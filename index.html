@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ecos Ancestrais - Uma jornada imersiva pela cultura, história e resistência dos povos indígenas do Brasil.">
+    <meta name="keywords" content="indígenas, brasil, cultura, história, resistência, amazônia, arte, cosmologia">
+    <meta name="author" content="Ecos Ancestrais">
+    <meta property="og:title" content="Ecos Ancestrais - Uma Jornada Indígena">
+    <meta property="og:description" content="Explore a sabedoria, a arte e a luta dos povos originários em uma experiência web imersiva.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop">
+    <meta property="og:type" content="website">
+    
+    <title>Ecos Ancestrais - Uma Jornada Indígena</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Import map for Three.js and GSAP -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "gsap": "https://unpkg.com/gsap@3.12.5/index.js",
+                "gsap/ScrollTrigger": "https://unpkg.com/gsap@3.12.5/ScrollTrigger.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Carregando Ancestralidade...</div>
+        </div>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Full Screen Modal with Custom Slider -->
+    <div class="modal-overlay">
+        <button class="close-modal">&times;</button>
+        
+        <div class="custom-slider">
+            <div class="slider-track">
+                <!-- Slide 0 -->
+                <div class="custom-slide" data-index="0">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Medicina da Floresta</h2>
+                            <p>A farmácia viva. Cada folha guarda um segredo, cada raiz uma cura. O conhecimento milenar que cura o corpo e o espírito. Os pajés são os guardiões desses segredos, transmitidos oralmente através de gerações, conectando o mundo físico ao espiritual através das plantas de poder.</p>
+                        </div>
+                        <div class="slide-visual visual-medicine"></div>
+                    </div>
+                </div>
+                <!-- Slide 1 -->
+                <div class="custom-slide" data-index="1">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Línguas Vivas</h2>
+                            <p>Mais de 270 línguas faladas apenas no Brasil. Cada palavra perdida é um universo que se apaga. A língua carrega a alma de um povo, sua forma de ver e descrever o mundo. Preservar a língua é preservar a própria existência e a diversidade do pensamento humano.</p>
+                        </div>
+                        <div class="slide-visual visual-language"></div>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="custom-slide" data-index="2">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Arte e Grafismo</h2>
+                            <p>A pele como tela. Os padrões não são apenas enfeites, são códigos de identidade, proteção e hierarquia. O jenipapo e o urucum são as tintas sagradas que conectam o corpo à natureza. Cada traço conta uma história, cada geometria revela uma linhagem.</p>
+                        </div>
+                        <div class="slide-visual visual-art"></div>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="custom-slide" data-index="3">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Cosmologia</h2>
+                            <p>O céu é um mapa. As constelações contam histórias de caça, plantio e a origem de todas as coisas. Para os indígenas, não há separação entre o céu e a terra, tudo é um grande ciclo cósmico onde estrelas são ancestrais que nos observam.</p>
+                        </div>
+                        <div class="slide-visual visual-cosmos"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slider-nav">
+                <button class="nav-btn prev-btn">←</button>
+                <div class="slider-dots"></div>
+                <button class="nav-btn next-btn">→</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="narrative-container">
+        
+        <!-- Chapter 1: Origin -->
+        <section class="chapter" id="chapter-origin">
+            <div class="chapter-marker">Capítulo I</div>
+            <h1 class="chapter-title" data-text="O Sonho da Floresta">O Sonho da Floresta</h1>
+            
+            <div class="text-block left sway-text">
+                <p><span class="drop-cap">A</span>ntes que o tempo fosse contado em horas, ele era medido pelo ritmo das águas. Nós nascemos do sonho da floresta, quando as árvores ainda sussurravam os nomes dos primeiros homens.</p>
+            </div>
+
+            <div class="text-block right sway-text" style="animation-delay: 1s;">
+                <p>Não havia fronteiras, nem cercas. O mundo era vasto e nós éramos apenas mais uma parte dele, vibrando na mesma frequência que o solo sob nossos pés.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 2: Connection -->
+        <section class="chapter" id="chapter-connection">
+            <div class="chapter-marker">Capítulo II</div>
+            <h1 class="chapter-title" data-text="Sangue e Seiva">Sangue e Seiva</h1>
+
+            <div class="text-block center sway-text" style="animation-delay: 2s;">
+                <p>Dizem que pisamos na terra. Nós dizemos que a terra nos sustenta.</p>
+            </div>
+
+            <div class="text-block left sway-text" style="animation-delay: 0.5s;">
+                <p>Cada rio é uma veia que pulsa. Cada montanha é um osso antigo. Quando a floresta chora, nós choramos. Quando ela queima, nossa pele arde.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 3: Territory -->
+        <section class="chapter" id="chapter-territory">
+            <div class="chapter-marker">Capítulo III</div>
+            <h1 class="chapter-title" data-text="O Território Sagrado">O Território Sagrado</h1>
+
+            <div class="text-block right sway-text" style="animation-delay: 1.5s;">
+                <p>O território não é mercadoria. É mãe, é avó, é história. Sem ele, somos folhas soltas ao vento, sem direção, sem memória.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 3.5: Artifacts (New) -->
+        <section class="chapter" id="chapter-artifacts">
+            <div class="chapter-marker">Capítulo IV</div>
+            <h1 class="chapter-title" data-text="Mãos que Criam">Mãos que Criam</h1>
+
+            <div class="text-block left sway-text">
+                <p>Do barro nasce a vida. Nossas mãos moldam a terra assim como a terra nos moldou. Cada vaso, cada pintura, carrega a alma de quem o fez e a memória de quem veio antes.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 4: Resistance -->
+        <section class="chapter" id="chapter-resistance">
+            <div class="chapter-marker">Capítulo V</div>
+            <h1 class="chapter-title" data-text="A Tempestade">A Tempestade</h1>
+
+            <div class="text-block center sway-text">
+                <p class="emphasis">Eles vieram com ventos de ferro e fogo.</p>
+            </div>
+
+            <div class="text-block left sway-text" style="animation-delay: 1s;">
+                <p>Tentaram apagar nossa voz, quebrar nossos arcos, silenciar nossos cantos. Mas raízes profundas não temem a tempestade. Nós nos curvamos, mas não quebramos.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 5: The Burning -->
+        <section class="chapter" id="chapter-fire">
+            <div class="chapter-marker">Capítulo V</div>
+            <h1 class="chapter-title" data-text="Cinzas e Brasas">Cinzas e Brasas</h1>
+            
+            <div class="text-block center sway-text">
+                <p class="emphasis">A floresta grita em silêncio.</p>
+            </div>
+
+            <div class="text-block right sway-text" style="animation-delay: 0.5s;">
+                <p>O fogo devora memórias antigas. Vemos nossa casa queimar, escaneada pela ganância, transformada em números e carvão. Mas cada brasa que sobe leva consigo uma prece de renovação.</p>
+            </div>
+        </section>
+
+        <!-- Knowledge Stack (Kept as an interlude) -->
+        <section class="knowledge-section" id="knowledge-stack">
+            <div class="knowledge-container">
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop');">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-number">01</div>
+                        <h2>Medicina da Floresta</h2>
+                        <p>A farmácia viva. Cada folha guarda um segredo, cada raiz uma cura.</p>
+                        <div class="card-action">
+                            <span>Explorar</span>
+                            <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1534531173927-aeb928d54385?q=80&w=1000&auto=format&fit=crop');">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-number">02</div>
+                        <h2>Línguas Vivas</h2>
+                        <p>Mais de 270 línguas. Cada palavra é um universo.</p>
+                        <div class="card-action">
+                            <span>Explorar</span>
+                            <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=1000&auto=format&fit=crop');">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-number">03</div>
+                        <h2>Arte e Grafismo</h2>
+                        <p>A pele como tela. Códigos de identidade e proteção.</p>
+                        <div class="card-action">
+                            <span>Explorar</span>
+                            <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop');">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-number">04</div>
+                        <h2>Cosmologia</h2>
+                        <p>O céu é um mapa. As estrelas são nossos ancestrais.</p>
+                        <div class="card-action">
+                            <span>Explorar</span>
+                            <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 5.5: Cosmology (New) -->
+        <section class="chapter" id="chapter-cosmology">
+            <div class="chapter-marker">Capítulo VII</div>
+            <h1 class="chapter-title" data-text="O Céu Ancestral">O Céu Ancestral</h1>
+
+            <div class="text-block center sway-text">
+                <p>Olhamos para cima para entender o que está embaixo. As estrelas desenham o Jaguar, a Ema, o Homem Velho. Elas nos dizem quando plantar, quando colher e quando é tempo de guerra ou de paz.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 5.8: Heroes (New) -->
+        <section class="chapter heroes-section" id="chapter-heroes">
+            <div class="chapter-marker">Capítulo VIII</div>
+            <h1 class="chapter-title" data-text="Vozes da Terra">Vozes da Terra</h1>
+            
+            <div class="heroes-gallery">
+                <!-- Hero 1: Sepé Tiaraju -->
+                <div class="hero-card active" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/2/2b/Est%C3%A1tua_Sep%C3%A9_Tiaraju.jpg');">
+                    <div class="hero-content">
+                        <h2>Sepé Tiaraju</h2>
+                        <p class="hero-role">O Guerreiro Guarani</p>
+                        <div class="hero-details">
+                            <p>"Esta terra tem dono!" Líder da resistência Guarani nas Guerras Guaraníticas. Símbolo eterno de luta pela terra e autonomia.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero 2: Raoni Metuktire -->
+                <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/4/47/Raoni_Metuktire_close-up_%28cropped%29.jpg');">
+                    <div class="hero-content">
+                        <h2>Raoni Metuktire</h2>
+                        <p class="hero-role">Líder Kayapó</p>
+                        <div class="hero-details">
+                            <p>Uma das vozes indígenas mais reconhecidas mundialmente. Dedicou sua vida à defesa da Amazônia e dos direitos dos povos originários.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero 3: Davi Kopenawa -->
+                <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/5/54/Davi_Kopenawa_Yanomami_at_2024_Cannes_Film_Festival_for_The_Falling_Sky_%28cropped%29.jpg');">
+                    <div class="hero-content">
+                        <h2>Davi Kopenawa</h2>
+                        <p class="hero-role">Xamã Yanomami</p>
+                        <div class="hero-details">
+                            <p>Autor de "A Queda do Céu". Alerta o mundo sobre os perigos da destruição da floresta e a sabedoria xamânica para segurar o céu.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero 4: Ailton Krenak -->
+                <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/0/04/12%C2%BA_CBA_-_Confer%C3%AAncia_de_Encerramento_%2823_11_2023%29_%2853587946110%29.jpg');">
+                    <div class="hero-content">
+                        <h2>Ailton Krenak</h2>
+                        <p class="hero-role">Filósofo e Escritor</p>
+                        <div class="hero-details">
+                            <p>Pensador contemporâneo que nos ensina a "adiar o fim do mundo". Sua pintura de rosto com jenipapo no Congresso em 1987 mudou a Constituição.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero 5: Sônia Guajajara -->
+                <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/a/a9/26.08.2025_%E2%80%93_Reuni%C3%A3o_Ministerial_-_54745615562.jpg');">
+                    <div class="hero-content">
+                        <h2>Sônia Guajajara</h2>
+                        <p class="hero-role">Liderança e Ministra</p>
+                        <div class="hero-details">
+                            <p>Primeira Ministra dos Povos Indígenas do Brasil. Uma força da natureza na política, levando a voz indígena para os espaços de poder.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 5: Celebration -->
+        <section class="chapter" id="chapter-celebration">
+            <div class="chapter-marker">Capítulo IX</div>
+            <h1 class="chapter-title" data-text="A Dança da Vida">A Dança da Vida</h1>
+
+            <div class="text-block right">
+                <p>Apesar da dor, nós dançamos. Dançamos para chamar a chuva, para agradecer ao sol, para celebrar a vida que insiste em brotar.</p>
+            </div>
+        </section>
+
+        <!-- Chapter 6: Future -->
+        <section class="chapter" id="chapter-future">
+            <div class="chapter-marker">Capítulo X</div>
+            <h1 class="chapter-title" data-text="O Amanhã Ancestral">O Amanhã Ancestral</h1>
+
+            <div class="text-block center">
+                <p>O futuro não é uma linha reta para frente. É um círculo. Para curar o mundo, precisamos ouvir o que os antigos sussurram.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="scroll-indicator">
+        <span>Explore a Jornada</span>
+        <div class="line"></div>
+    </div>
+
+    <!-- Sound Toggle Button -->
+    <button id="sound-toggle" class="sound-btn">
+        <span class="sound-icon">OFF</span>
+        <span class="sound-text">SOM</span>
+    </button>
+
+    <audio id="bg-audio" loop>
+        <source src="assets/audio/connection.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Indigenous Timeline Navigation -->
+    <nav class="timeline-nav">
+        <div class="timeline-line">
+            <div class="timeline-progress"></div>
+        </div>
+        <ul class="timeline-items">
+            <li class="timeline-item" data-target="#chapter-origin">
+                <div class="marker"></div>
+                <span class="tooltip">Origem</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-connection">
+                <div class="marker"></div>
+                <span class="tooltip">Conexão</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-territory">
+                <div class="marker"></div>
+                <span class="tooltip">Território</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-artifacts">
+                <div class="marker"></div>
+                <span class="tooltip">Arte</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-resistance">
+                <div class="marker"></div>
+                <span class="tooltip">Resistência</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-fire">
+                <div class="marker"></div>
+                <span class="tooltip">Cinzas</span>
+            </li>
+            <li class="timeline-item" data-target="#knowledge-stack">
+                <div class="marker"></div>
+                <span class="tooltip">Saberes</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-cosmology">
+                <div class="marker"></div>
+                <span class="tooltip">Céu</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-heroes">
+                <div class="marker"></div>
+                <span class="tooltip">Vozes</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-celebration">
+                <div class="marker"></div>
+                <span class="tooltip">Celebração</span>
+            </li>
+            <li class="timeline-item" data-target="#chapter-future">
+                <div class="marker"></div>
+                <span class="tooltip">Futuro</span>
+            </li>
+        </ul>
+    </nav>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
