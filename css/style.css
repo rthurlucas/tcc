@@ -135,10 +135,6 @@ body.hovering .cursor-outline {
     border-color: var(--accent-color);
 }
 
-/* Ensure all interactive elements trigger the hover state via JS or CSS if possible, 
-   but since we use a custom div, we need JS to toggle the class on body or the cursor itself. 
-   We'll handle the logic in JS. 
-   But we also need to ensure the default cursor is hidden on everything. */
 a, button, .knowledge-card, .hero-card, .timeline-item {
     cursor: none;
 }
@@ -288,26 +284,32 @@ main {
     opacity: 0.7;
 }
 
-/* Knowledge Stack Section */
+/* --- Knowledge Stack Section (CORRIGIDO) --- */
 .knowledge-section {
     height: 100vh;
     width: 100%;
     overflow: hidden;
     display: flex;
     align-items: center;
+    position: relative;
     background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
 }
 
 .knowledge-container {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap; /* Garante que fiquem em linha reta */
     padding-left: 10vw;
-    gap: 4vw;
+    gap: 6vw;
+    width: max-content; /* Permite que cresça além da tela */
+    will-change: transform; /* Otimiza performance */
 }
 
 .knowledge-card {
-    min-width: 350px;
-    height: 550px;
+    min-width: 400px; /* Garante que não fiquem pequenos demais */
+    width: 25vw;
+    height: 60vh;
+    flex-shrink: 0;   /* Impede o card de ser espremido */
+    
     background-size: cover;
     background-position: center;
     border-radius: 15px;
