@@ -14,7 +14,7 @@ const CONFIG = {
     ashCount: 3000,
     rainCount: 3000, 
     cocarParticleCount: 1500,
-    danceParticleCount: 15000, // Aumentei um pouco para dar mais definição ao Cocar/Saias
+    danceParticleCount: 12000, // Quantidade para os espíritos
     cometCount: 5,
     colors: {
         origin: new THREE.Color('#d4a373'),
@@ -30,7 +30,8 @@ const CONFIG = {
         clay: new THREE.Color('#8b4513'),
         storm: new THREE.Color('#1a1a2e'),
         smoke: new THREE.Color('#24110c'),
-        gold: new THREE.Color('#ffd700')
+        gold: new THREE.Color('#ffd700'),
+        spiritBlue: new THREE.Color('#a8dadc')
     },
     leafColor: new THREE.Color('#4d9e5f')
 };
@@ -42,7 +43,10 @@ const chapters = [
 ];
 
 // Estado Global
-let mouseX = 0; let mouseY = 0; let isStormActive = false; let lightningStrength = 0;
+let mouseX = 0;
+let mouseY = 0;
+let isStormActive = false;
+let lightningStrength = 0;
 
 // =========================================================================
 // --- 2. CENA E CÂMERA ---
@@ -156,7 +160,7 @@ const fireflyMaterial = new THREE.ShaderMaterial({
 });
 const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial); scene.add(fireflies);
 
-// --- D. Cinzas ---
+// --- D. Cinzas (Ashes) ---
 const ashGeometry = new THREE.BufferGeometry();
 const ashPositions = new Float32Array(CONFIG.ashCount * 3); const ashRandoms = new Float32Array(CONFIG.ashCount * 3);
 for(let i=0; i<CONFIG.ashCount; i++) { ashPositions[i*3] = (Math.random() - 0.5) * 25; ashPositions[i*3+1] = Math.random() * 15; ashPositions[i*3+2] = (Math.random() - 0.5) * 25; ashRandoms[i*3] = Math.random(); ashRandoms[i*3+1] = Math.random(); ashRandoms[i*3+2] = Math.random(); }
@@ -611,4 +615,24 @@ function closeModal() {
 closeBtn.addEventListener('click', closeModal); document.addEventListener('keydown', (e) => { if (modalOverlay.style.visibility !== 'hidden') { if (e.key === 'Escape') closeModal(); if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1); if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1); } });
 const bgAudio = document.getElementById('bg-audio'); bgAudio.volume = 0; let isMuted = true; const soundBtn = document.getElementById('sound-toggle'); const soundIcon = soundBtn.querySelector('.sound-icon'); function toggleSound() { isMuted = !isMuted; if (isMuted) { soundIcon.textContent = "OFF"; soundBtn.classList.remove('playing'); gsap.to(bgAudio, { volume: 0, duration: 1, onComplete: () => bgAudio.pause() }); } else { soundIcon.textContent = "ON"; soundBtn.classList.add('playing'); bgAudio.play().then(() => { gsap.to(bgAudio, { volume: 0.5, duration: 1 }); }).catch(e => console.error("Audio play failed:", e)); } } soundBtn.addEventListener('click', toggleSound); const timelineItems = document.querySelectorAll('.timeline-item'); const timelineProgress = document.querySelector('.timeline-progress'); chapters.forEach((id, index) => { const section = document.querySelector(id); if (section) { ScrollTrigger.create({ trigger: section, start: "top center", end: "bottom center", onEnter: () => updateTimeline(index), onEnterBack: () => updateTimeline(index) }); } }); function updateTimeline(index) { timelineItems.forEach((item, i) => { if (i === index) item.classList.add('active'); else item.classList.remove('active'); }); const progress = (index / (chapters.length - 1)) * 100; gsap.to(timelineProgress, { height: `${progress}%`, duration: 0.5, ease: "power2.out" }); } timelineItems.forEach((item) => { item.addEventListener('click', (e) => { const targetId = item.getAttribute('data-target'); const targetSection = document.querySelector(targetId); if (targetSection) { gsap.to(window, { duration: 1.5, scrollTo: { y: targetSection, autoKill: false }, ease: "power3.inOut" }); } }); }); const heroCards = document.querySelectorAll('.hero-card'); heroCards.forEach(card => { card.addEventListener('click', () => { heroCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); }); card.addEventListener('mouseenter', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(0%) brightness(0.9)", duration: 0.3 }); } }); card.addEventListener('mouseleave', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(100%) brightness(0.7)", duration: 0.3 }); } }); });
 
-window.addEventListener('load', () => { const preloader = document.getElementById('preloader'); if (preloader) { window.scrollTo(0, 0); const hidePreloader = () => { gsap.to(preloader, { opacity: 0, duration: 1, onComplete: () => { preloader.style.visibility = 'hidden'; ScrollTrigger.refresh(); } }); }; setTimeout(hidePreloader, 500); setTimeout(() => { if(preloader.style.visibility !== 'hidden') hidePreloader(); }, 4000); } });
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        window.scrollTo(0, 0);
+        const hidePreloader = () => {
+            gsap.to(preloader, {
+                opacity: 0,
+                duration: 1,
+                onComplete: () => {
+                    preloader.style.visibility = 'hidden';
+                    ScrollTrigger.refresh();
+                }
+            });
+        };
+        
+        setTimeout(hidePreloader, 500);
+        setTimeout(() => {
+            if(preloader.style.visibility !== 'hidden') hidePreloader();
+        }, 4000);
+    }
+});
