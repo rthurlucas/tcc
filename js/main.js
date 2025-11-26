@@ -14,7 +14,8 @@ const CONFIG = {
     ashCount: 3000,
     rainCount: 3000, 
     cocarParticleCount: 1500,
-    danceParticleCount: 12000, // Quantidade para os espíritos
+    sparkCount: 1500,
+    danceParticleCount: 15000, 
     cometCount: 5,
     colors: {
         origin: new THREE.Color('#d4a373'),
@@ -63,10 +64,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // =========================================================================
-// --- 3. SISTEMAS DE PARTÍCULAS ---
+// --- 3. SISTEMAS DE PARTÍCULAS (AMBIENTE) ---
 // =========================================================================
 
-// --- A. Partículas Principais ---
+// --- A. Partículas Principais (Chão) ---
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(CONFIG.particleCount * 3);
 const randoms = new Float32Array(CONFIG.particleCount);
@@ -110,22 +111,17 @@ const leafMaterial = new THREE.ShaderMaterial({
         uniform float uTime; attribute vec3 aRandom; varying float vAlpha;
         void main() {
             vec3 pos = position; float time = uTime;
-            float fallSpeed = 0.5 + aRandom.x * 1.5;
-            pos.y -= time * fallSpeed; pos.y = mod(pos.y + 5.0, 20.0) - 5.0; 
-            pos.x += sin(time * aRandom.y + aRandom.z * 10.0) * 0.5;
-            pos.z += cos(time * aRandom.y * 0.8 + aRandom.z * 10.0) * 0.5;
-            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-            gl_Position = projectionMatrix * mvPosition;
-            gl_PointSize = (4.0 + aRandom.x * 4.0) * (10.0 / -mvPosition.z);
-            vAlpha = 0.8 - smoothstep(10.0, 20.0, length(pos));
+            float fallSpeed = 0.5 + aRandom.x * 1.5; pos.y -= time * fallSpeed; pos.y = mod(pos.y + 5.0, 20.0) - 5.0; 
+            pos.x += sin(time * aRandom.y + aRandom.z * 10.0) * 0.5; pos.z += cos(time * aRandom.y * 0.8 + aRandom.z * 10.0) * 0.5;
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
+            gl_PointSize = (4.0 + aRandom.x * 4.0) * (10.0 / -mvPosition.z); vAlpha = 0.8 - smoothstep(10.0, 20.0, length(pos));
         }
     `,
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
         void main() {
             float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5);
-            gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5); gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
         }
     `,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
@@ -142,25 +138,22 @@ const fireflyMaterial = new THREE.ShaderMaterial({
     vertexShader: `
         uniform float uTime; attribute vec3 aRandom;
         void main() {
-            vec3 pos = position; vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-            gl_Position = projectionMatrix * mvPosition;
-            float pulse = 1.0 + 0.3 * sin(uTime * 3.0 + aRandom.x * 100.0);
-            gl_PointSize = (8.0 + aRandom.x * 5.0) * pulse * (10.0 / -mvPosition.z);
+            vec3 pos = position; vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
+            float pulse = 1.0 + 0.3 * sin(uTime * 3.0 + aRandom.x * 100.0); gl_PointSize = (8.0 + aRandom.x * 5.0) * pulse * (10.0 / -mvPosition.z);
         }
     `,
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity;
         void main() {
             float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard; 
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0); 
-            gl_FragColor = vec4(uColor, glow * uOpacity);
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0); gl_FragColor = vec4(uColor, glow * uOpacity);
         }
     `,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
 });
 const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial); scene.add(fireflies);
 
-// --- D. Cinzas (Ashes) ---
+// --- D. Cinzas (Escuras e Irregulares) ---
 const ashGeometry = new THREE.BufferGeometry();
 const ashPositions = new Float32Array(CONFIG.ashCount * 3); const ashRandoms = new Float32Array(CONFIG.ashCount * 3);
 for(let i=0; i<CONFIG.ashCount; i++) { ashPositions[i*3] = (Math.random() - 0.5) * 25; ashPositions[i*3+1] = Math.random() * 15; ashPositions[i*3+2] = (Math.random() - 0.5) * 25; ashRandoms[i*3] = Math.random(); ashRandoms[i*3+1] = Math.random(); ashRandoms[i*3+2] = Math.random(); }
@@ -186,7 +179,9 @@ const ashMaterial = new THREE.ShaderMaterial({
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
         void main() {
-            float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
+            vec2 uv = gl_PointCoord - 0.5; float r = length(uv);
+            float irregular = 0.5 + 0.1 * sin(atan(uv.y, uv.x) * 5.0); // Borda irregular
+            if (r > irregular) discard;
             gl_FragColor = vec4(uColor, vAlpha * 0.8 * uOpacity);
         }
     `,
@@ -194,56 +189,18 @@ const ashMaterial = new THREE.ShaderMaterial({
 });
 const ashParticles = new THREE.Points(ashGeometry, ashMaterial); scene.add(ashParticles);
 
-// =========================================================================
-// --- 4. OBJETOS 3D E EFEITOS ---
-// =========================================================================
-
-// --- COCAR DE PARTÍCULAS (Saberes) ---
-const cocarGeo = new THREE.BufferGeometry();
-const cocarPos = new Float32Array(CONFIG.cocarParticleCount * 3);
-const cocarRnd = new Float32Array(CONFIG.cocarParticleCount);
-const plumes = 30; const pointsPerPlume = 50; let idx = 0;
-for(let i=0; i<plumes; i++) {
-    const angle = (i / (plumes - 1)) * Math.PI; const baseX = Math.cos(angle) * 2.5; const baseY = Math.sin(angle) * 2.5;
-    for(let j=0; j<pointsPerPlume; j++) {
-        const t = j / pointsPerPlume; const spread = (Math.random() - 0.5) * 0.2 * t; 
-        cocarPos[idx*3] = baseX * (1 + t * 0.5) + spread; cocarPos[idx*3+1] = baseY * (1 + t * 0.5) + spread + 1.0; cocarPos[idx*3+2] = (Math.random() - 0.5) * 0.5; 
-        cocarRnd[idx] = Math.random(); idx++;
-    }
+// --- E. Brasas (Redondas e Vivas) ---
+const sparkGeo = new THREE.BufferGeometry();
+const sparkPos = new Float32Array(CONFIG.sparkCount * 3); 
+const sparkRandoms = new Float32Array(CONFIG.sparkCount * 3); 
+for(let i=0; i<CONFIG.sparkCount; i++) { 
+    sparkPos[i*3] = (Math.random() - 0.5) * 20; 
+    sparkPos[i*3+1] = Math.random() * 10; 
+    sparkPos[i*3+2] = (Math.random() - 0.5) * 10; 
+    sparkRandoms[i*3] = Math.random(); sparkRandoms[i*3+1] = Math.random(); sparkRandoms[i*3+2] = Math.random(); 
 }
-cocarGeo.setAttribute('position', new THREE.BufferAttribute(cocarPos, 3)); cocarGeo.setAttribute('aRandom', new THREE.BufferAttribute(cocarRnd, 1));
-const cocarMaterial = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: CONFIG.colors.gold }, uOpacity: { value: 0.0 } },
-    vertexShader: `
-        uniform float uTime; attribute float aRandom; varying float vAlpha;
-        void main() {
-            vec3 pos = position; float time = uTime * 0.5;
-            pos.x += sin(time + pos.y * 2.0) * 0.05; pos.z += cos(time + pos.x * 2.0) * 0.05;
-            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
-            gl_PointSize = (3.0 + aRandom * 3.0) * (10.0 / -mvPosition.z);
-            vAlpha = 0.8 + 0.2 * sin(time * 5.0 + aRandom * 10.0);
-        }
-    `,
-    fragmentShader: `
-        uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
-        void main() {
-            float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0);
-            gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
-        }
-    `,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-});
-const cocarParticles = new THREE.Points(cocarGeo, cocarMaterial); cocarParticles.position.set(0, 0, -5); scene.add(cocarParticles);
-
-// --- Brasas (Sparks) ---
-const sparkTotal = 1500; const sparkGeo = new THREE.BufferGeometry();
-const sparkPos = new Float32Array(sparkTotal * 3); const sparkRandoms = new Float32Array(sparkTotal * 3); const sparkOffsets = new Float32Array(sparkTotal);
-for(let i=0; i<sparkTotal; i++) { 
-    sparkPos[i*3] = (Math.random() - 0.5) * 20; sparkPos[i*3+1] = Math.random() * 10; sparkPos[i*3+2] = (Math.random() - 0.5) * 10; 
-    sparkRandoms[i*3] = Math.random(); sparkRandoms[i*3+1] = Math.random(); sparkRandoms[i*3+2] = Math.random(); sparkOffsets[i] = Math.random() * 100;
-}
-sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3)); sparkGeo.setAttribute('aRandom', new THREE.BufferAttribute(sparkRandoms, 3));
+sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+sparkGeo.setAttribute('aRandom', new THREE.BufferAttribute(sparkRandoms, 3));
 const sparkMaterial = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0xff4500) }, uOpacity: { value: 0.0 } },
     vertexShader: `
@@ -269,57 +226,90 @@ const sparkMaterial = new THREE.ShaderMaterial({
 });
 const sparks = new THREE.Points(sparkGeo, sparkMaterial); scene.add(sparks); 
 
+// =========================================================================
+// --- 4. OBJETOS 3D E EFEITOS ---
+// =========================================================================
+
+// --- COCAR DE PARTÍCULAS ---
+const cocarGeo = new THREE.BufferGeometry();
+const cocarPos = new Float32Array(CONFIG.cocarParticleCount * 3);
+const cocarRnd = new Float32Array(CONFIG.cocarParticleCount);
+const plumes = 30; const pointsPerPlume = 50; let idx = 0;
+for(let i=0; i<plumes; i++) {
+    const angle = (i / (plumes - 1)) * Math.PI; const baseX = Math.cos(angle) * 2.5; const baseY = Math.sin(angle) * 2.5;
+    for(let j=0; j<pointsPerPlume; j++) {
+        const t = j / pointsPerPlume; const spread = (Math.random() - 0.5) * 0.2 * t; 
+        cocarPos[idx*3] = baseX * (1 + t * 0.5) + spread; cocarPos[idx*3+1] = baseY * (1 + t * 0.5) + spread + 1.0; cocarPos[idx*3+2] = (Math.random() - 0.5) * 0.5; 
+        cocarRnd[idx] = Math.random(); idx++;
+    }
+}
+cocarGeo.setAttribute('position', new THREE.BufferAttribute(cocarPos, 3)); cocarGeo.setAttribute('aRandom', new THREE.BufferAttribute(cocarRnd, 1));
+const cocarMaterial = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uColor: { value: CONFIG.colors.gold }, uOpacity: { value: 0.0 } },
+    vertexShader: `uniform float uTime; attribute float aRandom; varying float vAlpha; void main() { vec3 pos = position; float time = uTime * 0.5; pos.x += sin(time + pos.y * 2.0) * 0.05; pos.z += cos(time + pos.x * 2.0) * 0.05; vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition; gl_PointSize = (3.0 + aRandom * 3.0) * (10.0 / -mvPosition.z); vAlpha = 0.8 + 0.2 * sin(time * 5.0 + aRandom * 10.0); }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uOpacity; varying float vAlpha; void main() { float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard; float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0); gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+});
+const cocarParticles = new THREE.Points(cocarGeo, cocarMaterial); cocarParticles.position.set(0, 0, -5); scene.add(cocarParticles);
+
 // --- Outros Objetos ---
 const artifactGroup = new THREE.Group(); scene.add(artifactGroup); artifactGroup.visible = true; const potteryPoints = []; for (let i = 0; i < 10; i++) { potteryPoints.push(new THREE.Vector2(Math.sin(i * 0.2) * 1 + 0.5, (i - 5) * 0.5)); } const potteryGeo = new THREE.LatheGeometry(potteryPoints, 20); const potteryMaterial = new THREE.MeshBasicMaterial({ color: 0x8b4513, wireframe: true, transparent: true, opacity: 0.0 }); const pottery = new THREE.Mesh(potteryGeo, potteryMaterial); artifactGroup.add(pottery); pottery.rotation.x = Math.PI / 6;
-const rainTotal = CONFIG.rainCount; const rainGeo = new THREE.BufferGeometry(); const rainPos = new Float32Array(rainTotal * 2 * 3); const rainVel = new Float32Array(rainTotal); for(let i=0; i<rainTotal; i++) { const x = (Math.random() - 0.5) * 40; const y = Math.random() * 30 + 10; const z = (Math.random() - 0.5) * 20; rainPos[i*6] = x; rainPos[i*6+1] = y; rainPos[i*6+2] = z; rainPos[i*6+3] = x; rainPos[i*6+4] = y - 0.5; rainPos[i*6+5] = z; rainVel[i] = 0.5 + Math.random() * 0.5; } rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3)); const rainMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.6 }); const rain = new THREE.LineSegments(rainGeo, rainMaterial); rain.visible = false; scene.add(rain);
+const rainGeo = new THREE.BufferGeometry(); const rainPos = new Float32Array(CONFIG.rainCount * 2 * 3); const rainVel = new Float32Array(CONFIG.rainCount); for(let i=0; i<CONFIG.rainCount; i++) { const x = (Math.random() - 0.5) * 40; const y = Math.random() * 30 + 10; const z = (Math.random() - 0.5) * 20; rainPos[i*6] = x; rainPos[i*6+1] = y; rainPos[i*6+2] = z; rainPos[i*6+3] = x; rainPos[i*6+4] = y - 0.5; rainPos[i*6+5] = z; rainVel[i] = 0.5 + Math.random() * 0.5; } rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3)); const rainMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.6 }); const rain = new THREE.LineSegments(rainGeo, rainMaterial); rain.visible = false; scene.add(rain);
 const skyGeo = new THREE.PlaneGeometry(100, 100); const skyMaterial = new THREE.MeshBasicMaterial({ color: 0x6e7f99, transparent: true, opacity: 0.0, side: THREE.DoubleSide }); const stormSkyPlane = new THREE.Mesh(skyGeo, skyMaterial); stormSkyPlane.position.z = -20; scene.add(stormSkyPlane);
 const lightningSegmentCount = 25; const lightningGeo = new THREE.BufferGeometry(); const lightningPositions = new Float32Array((lightningSegmentCount + 1) * 3); lightningGeo.setAttribute('position', new THREE.BufferAttribute(lightningPositions, 3)); const lightningMat = new THREE.LineBasicMaterial({ color: 0xe0ffff, linewidth: 2 }); const lightningBolt = new THREE.Line(lightningGeo, lightningMat); lightningBolt.visible = false; scene.add(lightningBolt);
 function regenerateLightningPath(geo) { const posAttribute = geo.attributes.position; const array = posAttribute.array; let x = (Math.random() - 0.5) * 30; let y = 25; let z = (Math.random() - 0.5) * 15 - 5; const stepY = y / lightningSegmentCount; array[0] = x; array[1] = y; array[2] = z; for (let i = 1; i <= lightningSegmentCount; i++) { x += (Math.random() - 0.5) * 3; y -= stepY; z += (Math.random() - 0.5) * 2; array[i*3] = x; array[i*3+1] = y; array[i*3+2] = z; } posAttribute.needsUpdate = true; }
 const forestGroup = new THREE.Group(); scene.add(forestGroup); forestGroup.visible = false; const treeGeometries = []; for (let i = 0; i < 50; i++) { const height = 1 + Math.random() * 2; const radius = 0.2 + Math.random() * 0.3; const treeGeo = new THREE.ConeGeometry(radius, height, 4, 1, true); const x = (Math.random() - 0.5) * 20; const z = (Math.random() - 0.5) * 10 - 5; treeGeo.translate(x, height / 2, z); treeGeometries.push(treeGeo); } const forestMaterial = new THREE.ShaderMaterial({ uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color('#ff0000') }, uScanHeight: { value: -5.0 } }, vertexShader: `varying vec3 vPos; void main() { vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`, fragmentShader: `uniform vec3 uColor; uniform float uScanHeight; varying vec3 vPos; void main() { vec3 color = uColor * 0.2; float scanWidth = 0.5; float dist = abs(vPos.y - uScanHeight); if (dist < scanWidth) { float intensity = 1.0 - (dist / scanWidth); color += uColor * intensity * 2.0; } gl_FragColor = vec4(color, 1.0); }`, wireframe: true, transparent: true, blending: THREE.AdditiveBlending }); treeGeometries.forEach(geo => { const edges = new THREE.EdgesGeometry(geo); const line = new THREE.LineSegments(edges, forestMaterial); forestGroup.add(line); });
 const constellationGroup = new THREE.Group(); scene.add(constellationGroup); constellationGroup.visible = false; const starTotal = 200; const starGeo = new THREE.BufferGeometry(); const starPos = new Float32Array(starTotal * 3); for(let i=0; i<starTotal; i++) { starPos[i*3] = (Math.random() - 0.5) * 50; starPos[i*3+1] = (Math.random() - 0.5) * 30 + 10; starPos[i*3+2] = (Math.random() - 0.5) * 20 - 10; } starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true }); const stars = new THREE.Points(starGeo, starMaterial); constellationGroup.add(stars); const jaguarPoints = [ new THREE.Vector3(-5, 12, -15), new THREE.Vector3(-2, 14, -15), new THREE.Vector3(2, 13, -15), new THREE.Vector3(5, 10, -15), new THREE.Vector3(3, 8, -15), new THREE.Vector3(-1, 9, -15), new THREE.Vector3(-4, 7, -15) ]; const jaguarGeo = new THREE.BufferGeometry().setFromPoints(jaguarPoints); const jaguarLine = new THREE.Line(jaguarGeo, new THREE.LineBasicMaterial({ color: 0xa8dadc, transparent: true, opacity: 0.5 })); constellationGroup.add(jaguarLine);
 
-// --- Cometas (Shooting Stars) ---
+// --- Cometas ---
 const cometCount = CONFIG.cometCount; const comets = []; const cometGeo = new THREE.PlaneGeometry(0.8, 15); const cometMat = new THREE.ShaderMaterial({ uniforms: { uColorHead: { value: new THREE.Color(0xffffff) }, uColorTail: { value: new THREE.Color(0x4b0082) }, uTime: { value: 0 } }, vertexShader: `varying vec2 vUv; void main() { vUv = uv; vec3 pos = position; mat3 rotX = mat3(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0); pos = rotX * pos; gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0); }`, fragmentShader: `uniform vec3 uColorHead; uniform vec3 uColorTail; varying vec2 vUv; void main() { float intensity = pow(vUv.y, 2.0); vec3 finalColor = mix(uColorTail, uColorHead, intensity); float alpha = smoothstep(0.0, 0.2, vUv.y) * (1.0 - abs(vUv.x - 0.5) * 2.0); gl_FragColor = vec4(finalColor, alpha); }`, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
 function resetComet(comet) { comet.position.z = -150 - Math.random() * 100; comet.position.x = (Math.random() - 0.5) * 200; comet.position.y = (Math.random() - 0.5) * 100 + 30; comet.userData.speed = 0.5 + Math.random() * 1.5; comet.rotation.z = (Math.random() - 0.5) * 0.5; comet.rotation.y = (Math.random() - 0.5) * 0.2; }
 for (let i = 0; i < cometCount; i++) { const comet = new THREE.Mesh(cometGeo, cometMat.clone()); resetComet(comet); comet.position.z = -50 - Math.random() * 200; constellationGroup.add(comet); comets.push(comet); }
 
-// --- DANÇA DA VIDA (Espíritos Ancestrais Indígenas) ---
+// --- DANÇA DA VIDA (Personalizada: Indígena e Sincronizada) ---
 const danceParticleCount = CONFIG.danceParticleCount; 
 const danceGeo = new THREE.BufferGeometry();
 const dancePos = new Float32Array(danceParticleCount * 3);
 const danceAttr = new Float32Array(danceParticleCount * 3); // [DancerID, BodyPartID, Randomness]
-const dancer1Center = new THREE.Vector3(-1.2, 0.0, -3); // Mais próximos e menores
-const dancer2Center = new THREE.Vector3(1.2, 0.0, -3);  
+const dancer1Center = new THREE.Vector3(-1.5, -0.5, -3); 
+const dancer2Center = new THREE.Vector3(1.5, -0.5, -3);  
 
 for (let i = 0; i < danceParticleCount; i++) {
     const dancerId = i < danceParticleCount / 2 ? 0 : 1;
     const center = dancerId === 0 ? dancer1Center : dancer2Center;
     
-    // Definição de partes do corpo para visual indígena
-    const bodyPartRand = Math.random();
-    let bodyPartId = 0; // 0: Torso
-    if (bodyPartRand > 0.90) bodyPartId = 1;      // 1: Cabeça
-    else if (bodyPartRand > 0.85) bodyPartId = 4; // 4: Cocar (Novo)
-    else if (bodyPartRand > 0.65) bodyPartId = 2; // 2: Braços/Adereços
-    else if (bodyPartRand > 0.30) bodyPartId = 3; // 3: Pernas/Saia
+    const shapeRnd = Math.random();
+    let bodyPartId = 0;
+    let pX = 0, pY = 0, pZ = 0;
 
-    // Escala reduzida (0.6x do original) para ficarem menores
-    let xOffset = (Math.random() - 0.5) * 0.5;
-    let yOffset = (Math.random() - 0.5) * 0.9;
-    let zOffset = (Math.random() - 0.5) * 0.5;
-
-    if (bodyPartId === 1) { yOffset += 0.9; xOffset *= 0.4; zOffset *= 0.4; } // Cabeça
-    if (bodyPartId === 4) { yOffset += 1.2; xOffset *= 1.5; zOffset *= 0.5; } // Cocar (Largo e alto)
-    if (bodyPartId === 2) { xOffset *= 1.8; yOffset += 0.2; } // Braços abertos
-    if (bodyPartId === 3) { yOffset -= 0.6; xOffset *= 1.2; zOffset *= 1.2; } // Saia/Pernas
-
-    dancePos[i*3] = center.x + xOffset;
-    dancePos[i*3+1] = center.y + yOffset;
-    dancePos[i*3+2] = center.z + zOffset;
-
-    danceAttr[i*3] = dancerId;
-    danceAttr[i*3+1] = bodyPartId;
-    danceAttr[i*3+2] = Math.random(); 
+    if (shapeRnd < 0.25) { 
+        bodyPartId = 4.0; // CABELO
+        const theta = Math.random() * Math.PI * 2; const phi = Math.acos(2 * Math.random() - 1); const rad = 0.4 + Math.random() * 0.5; 
+        pX = rad * Math.sin(phi) * Math.cos(theta) * 1.2; pY = rad * Math.sin(phi) * Math.sin(theta) * 0.8 + 1.6; pZ = rad * Math.cos(phi) * 0.5 - 0.2;
+    } else if (shapeRnd < 0.55) {
+        bodyPartId = 3.0; // SAIA
+        const heightT = Math.random(); const angle = Math.random() * Math.PI * 2; const baseRadius = 0.8; const topRadius = 0.35;
+        const currentRadius = baseRadius * (1.0 - heightT) + topRadius * heightT;
+        pX = Math.cos(angle) * currentRadius * Math.random(); pY = heightT * 1.0 - 0.1; pZ = Math.sin(angle) * currentRadius * Math.random();
+    } else if (shapeRnd < 0.75) {
+        bodyPartId = 0.0; // TORSO
+        const angle = Math.random() * Math.PI * 2; const rad = 0.25 + Math.random() * 0.05;
+        pX = Math.cos(angle) * rad; pY = 1.0 + Math.random() * 0.4; pZ = Math.sin(angle) * rad * 0.5;
+    } else if (shapeRnd < 0.85) {
+        bodyPartId = 1.0; // CABEÇA
+        const angle = Math.random() * Math.PI * 2; const rad = 0.2 * Math.random();
+        pX = Math.cos(angle) * rad; pY = 1.65 + Math.random() * 0.25; pZ = Math.sin(angle) * rad;
+    } else {
+        bodyPartId = 2.0; // BRAÇOS
+        const t = Math.random(); 
+        if (Math.random() > 0.5 || dancerId === 1) { 
+            pX = 0.25 + t * 0.25 + (Math.random()-0.5)*0.1; pY = 1.35 + t * 0.25 + (Math.random()-0.5)*0.1; pZ = t * 0.4 + (Math.random()-0.5)*0.1;
+        } else {
+            pX = -0.25 - t * 0.1 + (Math.random()-0.5)*0.1; pY = 1.35 - t * 0.55 + (Math.random()-0.5)*0.1; pZ = t * 0.1 + (Math.random()-0.5)*0.1;
+        }
+    }
+    dancePos[i*3] = center.x + pX; dancePos[i*3+1] = center.y + pY; dancePos[i*3+2] = center.z + pZ;
+    danceAttr[i*3] = dancerId; danceAttr[i*3+1] = bodyPartId; danceAttr[i*3+2] = Math.random(); 
 }
 danceGeo.setAttribute('position', new THREE.BufferAttribute(dancePos, 3));
 danceGeo.setAttribute('danceAttr', new THREE.BufferAttribute(danceAttr, 3));
@@ -332,76 +322,40 @@ const danceMaterial = new THREE.ShaderMaterial({
         uOpacity: { value: 0.0 } 
     },
     vertexShader: `
-        uniform float uTime; attribute vec3 danceAttr; varying float vAlpha; varying float vDancerId;
+        uniform float uTime; attribute vec3 danceAttr; varying float vAlpha; varying float vDancerId; varying float vBodyPart;
         float hash(float n) { return fract(sin(n) * 43758.5453123); }
         float noise(vec3 x) { vec3 p = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f); float n = p.x + p.y * 57.0 + 113.0 * p.z; return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x), mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y), mix(mix(hash(n + 113.0), hash(n + 114.0), f.x), mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z); }
         void main() {
-            vec3 pos = position;
-            float dancerId = danceAttr.x;
-            float bodyPartId = danceAttr.y;
-            float rnd = danceAttr.z;
-            float t = uTime * 1.5;
-
-            // Lógica de Movimento Ancestral
+            vec3 pos = position; float dancerId = danceAttr.x; float bodyPartId = danceAttr.y; float rnd = danceAttr.z; float t = uTime * 0.8;
             vec3 danceOffset = vec3(0.0);
-
-            if (dancerId < 0.5) { 
-                // GUERREIRO
-                if (bodyPartId == 4.0) { // Cocar balançando
-                     danceOffset.x = sin(t*0.8 + pos.y)*0.1; 
-                     danceOffset.z = cos(t*0.8)*0.05; 
-                }
-                else if (bodyPartId < 0.5) { danceOffset.x = sin(t*0.8)*0.1; danceOffset.y = cos(t*1.6)*0.05; } // Torso
-                else if (bodyPartId < 1.5) { danceOffset.x = sin(t*0.8)*0.15; } // Cabeça
-                else if (bodyPartId < 2.5) { danceOffset.x = sin(t*1.2 + rnd)*0.4; danceOffset.y = cos(t*1.2 + rnd)*0.2; } // Braços
-                else { danceOffset.y = abs(sin(t*2.0 + rnd))*0.2; danceOffset.z = cos(t*1.0 + rnd)*0.15; } // Pernas
-            } else {
-                // FLUIDEZ (Estilo Moana)
-                if (bodyPartId == 4.0) { // Cocar/Cabelo flutuando
-                    danceOffset.x = sin(t + pos.y)*0.15; 
-                    danceOffset.y = cos(t*1.2)*0.1; 
-                }
-                else if (bodyPartId < 0.5) { danceOffset.x = sin(t)*0.1; danceOffset.z = cos(t)*0.1; } // Torso
-                else if (bodyPartId < 1.5) { danceOffset.y = sin(t*1.5 + rnd)*0.05; } // Cabeça
-                else if (bodyPartId < 2.5) { danceOffset.x = sin(t*1.1 + rnd*2.0)*0.3; danceOffset.y = cos(t*1.3 + rnd)*0.2; danceOffset.z = sin(t*0.7)*0.2; } // Braços
-                else { // Saia rodada
-                    float angle = t * 2.0 + rnd * 6.28; 
-                    float radius = 0.5 + rnd * 0.2; 
-                    danceOffset.x = cos(angle)*radius; 
-                    danceOffset.z = sin(angle)*radius; 
-                    danceOffset.y = sin(t*1.5 + rnd)*0.1; 
-                }
-            }
-
-            // Ruído de "Espírito"
-            vec3 noiseOffset = vec3(noise(pos * 0.8 + t * 0.5), noise(pos * 0.8 + t * 0.6 + 10.0), noise(pos * 0.8 + t * 0.7 + 20.0));
-            pos += danceOffset + noiseOffset * 0.2;
-
-            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-            gl_Position = projectionMatrix * mvPosition;
-            
-            // Tamanho das partículas
-            float sizeMult = (bodyPartId == 4.0) ? 2.5 : 1.5; // Cocar mais destacado
-            gl_PointSize = (2.0 + rnd * 4.0) * sizeMult * (10.0 / -mvPosition.z);
-            
-            vAlpha = 0.5 + 0.5 * rnd;
-            vDancerId = dancerId;
+            if (bodyPartId == 4.0) { danceOffset.x = sin(t*1.5 + pos.y + rnd)*0.15; danceOffset.z = cos(t*1.2 + pos.x)*0.1; danceOffset.y = sin(t*2.0 + rnd)*0.05; }
+            else if (bodyPartId == 3.0) { float angle = t + rnd * 6.28; float radiusDist = length(pos.xz - vec2(0.0)); danceOffset.x = cos(angle) * radiusDist * 0.1; danceOffset.z = sin(angle) * radiusDist * 0.1; danceOffset.y = sin(t*1.5 + pos.x)*0.05; }
+            else if (bodyPartId == 2.0) { float intensity = (pos.y > 1.4) ? 0.15 : 0.05; danceOffset.x = sin(t + rnd)*intensity; danceOffset.y = cos(t*1.3 + rnd)*intensity; }
+            else { danceOffset.x = sin(t*0.5 + rnd)*0.03; danceOffset.y = cos(t*0.7)*0.02; }
+            vec3 noisePos = pos * 1.5 + vec3(0.0, t * 0.5, 0.0);
+            vec3 noiseOffset = vec3(noise(noisePos), noise(noisePos + vec3(10.0)), noise(noisePos + vec3(20.0)));
+            pos += danceOffset + noiseOffset * 0.1;
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
+            float sizeBase = (bodyPartId == 4.0) ? 2.5 : (bodyPartId == 1.0 ? 1.2 : 1.8); 
+            gl_PointSize = (sizeBase + rnd * 2.0) * (15.0 / -mvPosition.z);
+            vAlpha = 0.7 + 0.3 * rnd; if(bodyPartId == 4.0 && rnd < 0.3) vAlpha *= 0.5;
+            vDancerId = dancerId; vBodyPart = bodyPartId;
         }
     `,
     fragmentShader: `
-        uniform vec3 uColor1; uniform vec3 uColor2; uniform float uOpacity; varying float vAlpha; varying float vDancerId;
+        uniform vec3 uColor1; uniform vec3 uColor2; uniform float uOpacity; varying float vAlpha; varying float vDancerId; varying float vBodyPart;
         void main() {
             float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0);
-            vec3 finalColor = mix(uColor1, uColor2, step(0.5, vDancerId));
-            finalColor += vec3(0.3) * glow; // Brilho extra
-            gl_FragColor = vec4(finalColor, vAlpha * glow * uOpacity);
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5);
+            vec3 baseColor = mix(uColor1, uColor2, step(0.5, vDancerId));
+            if(vBodyPart == 4.0) baseColor *= 0.85; if(vBodyPart == 2.0 && vAlpha > 0.8) baseColor += vec3(0.2);
+            gl_FragColor = vec4(baseColor, vAlpha * glow * uOpacity);
         }
     `,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
 });
 const danceSystem = new THREE.Points(danceGeo, danceMaterial);
-danceSystem.position.set(0, -1, 0); 
+danceSystem.position.set(0, -1.0, 0); // Ajuste de altura
 scene.add(danceSystem);
 
 const cursorDot = document.querySelector('.cursor-dot'); const cursorOutline = document.querySelector('.cursor-outline'); window.addEventListener('mousemove', (e) => { const posX = e.clientX; const posY = e.clientY; if(cursorDot) { cursorDot.style.left = `${posX}px`; cursorDot.style.top = `${posY}px`; } if(cursorOutline) cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" }); mouseX = e.clientX / window.innerWidth - 0.5; mouseY = e.clientY / window.innerHeight - 0.5; gsap.to(particles.rotation, { x: mouseY * 0.2, y: mouseX * 0.2 + (clock.getElapsedTime() * 0.05), duration: 1 }); });
@@ -423,10 +377,10 @@ function animate() {
     if (cometMat.uniforms) cometMat.uniforms.uTime.value = elapsedTime;
     if (danceMaterial.uniforms) danceMaterial.uniforms.uTime.value = elapsedTime;
 
-    if (particles) particles.rotation.y = elapsedTime * 0.05;
+    const globalRot = elapsedTime * 0.05;
+    if (particles) particles.rotation.y = globalRot;
+    if (danceSystem) danceSystem.rotation.y = globalRot; // Sincronizado!
     if (leafParticles) leafParticles.rotation.y = elapsedTime * 0.02;
-    // Sincronização: Dança gira junto com o ambiente (pedido do usuário)
-    if (danceSystem) danceSystem.rotation.y = elapsedTime * 0.05;
 
     if (fireflies) {
         const fPositions = fireflies.geometry.attributes.position.array; const fRandoms = fireflies.geometry.attributes.aRandom.array;
@@ -440,7 +394,7 @@ function animate() {
 
     if (isStormActive) {
         const rPos = rain.geometry.attributes.position.array;
-        for(let i=0; i<rainTotal; i++) {
+        for(let i=0; i<CONFIG.rainCount; i++) {
             const speed = rainVel[i]; rPos[i*6+1] -= speed; rPos[i*6+4] -= speed;
             if(rPos[i*6+1] < -10) {
                 const newY = 20 + Math.random() * 5; const newX = (Math.random() - 0.5) * 40; const newZ = (Math.random() - 0.5) * 20;
@@ -455,7 +409,6 @@ function animate() {
 
     if (typeof forestGroup !== 'undefined' && forestGroup.visible) forestMaterial.uniforms.uScanHeight.value = Math.sin(elapsedTime) * 2 + 1;
     
-    // Animação da Constelação e Cometas
     if (typeof constellationGroup !== 'undefined' && constellationGroup.visible) { 
         constellationGroup.rotation.z = Math.sin(elapsedTime * 0.1) * 0.05; 
         if (typeof comets !== 'undefined') {
@@ -492,12 +445,7 @@ if (knowledgeSection && knowledgeContainer) {
         x: -scrollAmount, 
         ease: "none", 
         scrollTrigger: { 
-            trigger: knowledgeSection, 
-            pin: true, 
-            scrub: 1, 
-            start: "top top", 
-            end: () => "+=" + scrollAmount, 
-            invalidateOnRefresh: true, 
+            trigger: knowledgeSection, pin: true, scrub: 1, start: "top top", end: () => "+=" + scrollAmount, invalidateOnRefresh: true, 
             onEnter: () => { 
                 gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 1 });
                 gsap.to(sparkMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 });
@@ -505,15 +453,9 @@ if (knowledgeSection && knowledgeContainer) {
                 gsap.to(scene.fog.color, { r: 0.02, g: 0.02, b: 0.02, duration: 1 }); 
                 gsap.to(material.uniforms.uColor.value, { r: CONFIG.colors.gold.r, g: CONFIG.colors.gold.g, b: CONFIG.colors.gold.b, duration: 1 });
             }, 
-            onLeave: () => { 
-                gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 1 });
-            }, 
-            onEnterBack: () => { 
-                gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 1 });
-            }, 
-            onLeaveBack: () => { 
-                gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 1 });
-            } 
+            onLeave: () => { gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 1 }); }, 
+            onEnterBack: () => { gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 1 }); }, 
+            onLeaveBack: () => { gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 1 }); } 
         } 
     }); 
 }
