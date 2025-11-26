@@ -14,6 +14,8 @@ const CONFIG = {
     ashCount: 3000,
     rainCount: 3000, 
     cocarParticleCount: 1500,
+    danceParticleCount: 15000, // Aumentei um pouco para dar mais definição ao Cocar/Saias
+    cometCount: 5,
     colors: {
         origin: new THREE.Color('#d4a373'),
         connection: new THREE.Color('#2a9d8f'),
@@ -40,10 +42,7 @@ const chapters = [
 ];
 
 // Estado Global
-let mouseX = 0;
-let mouseY = 0;
-let isStormActive = false;
-let lightningStrength = 0;
+let mouseX = 0; let mouseY = 0; let isStormActive = false; let lightningStrength = 0;
 
 // =========================================================================
 // --- 2. CENA E CÂMERA ---
@@ -157,7 +156,7 @@ const fireflyMaterial = new THREE.ShaderMaterial({
 });
 const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial); scene.add(fireflies);
 
-// --- D. Cinzas/Carvão (Ashes) ---
+// --- D. Cinzas ---
 const ashGeometry = new THREE.BufferGeometry();
 const ashPositions = new Float32Array(CONFIG.ashCount * 3); const ashRandoms = new Float32Array(CONFIG.ashCount * 3);
 for(let i=0; i<CONFIG.ashCount; i++) { ashPositions[i*3] = (Math.random() - 0.5) * 25; ashPositions[i*3+1] = Math.random() * 15; ashPositions[i*3+2] = (Math.random() - 0.5) * 25; ashRandoms[i*3] = Math.random(); ashRandoms[i*3+1] = Math.random(); ashRandoms[i*3+2] = Math.random(); }
@@ -195,7 +194,7 @@ const ashParticles = new THREE.Points(ashGeometry, ashMaterial); scene.add(ashPa
 // --- 4. OBJETOS 3D E EFEITOS ---
 // =========================================================================
 
-// --- COCAR DE PARTÍCULAS ---
+// --- COCAR DE PARTÍCULAS (Saberes) ---
 const cocarGeo = new THREE.BufferGeometry();
 const cocarPos = new Float32Array(CONFIG.cocarParticleCount * 3);
 const cocarRnd = new Float32Array(CONFIG.cocarParticleCount);
@@ -274,6 +273,133 @@ const lightningSegmentCount = 25; const lightningGeo = new THREE.BufferGeometry(
 function regenerateLightningPath(geo) { const posAttribute = geo.attributes.position; const array = posAttribute.array; let x = (Math.random() - 0.5) * 30; let y = 25; let z = (Math.random() - 0.5) * 15 - 5; const stepY = y / lightningSegmentCount; array[0] = x; array[1] = y; array[2] = z; for (let i = 1; i <= lightningSegmentCount; i++) { x += (Math.random() - 0.5) * 3; y -= stepY; z += (Math.random() - 0.5) * 2; array[i*3] = x; array[i*3+1] = y; array[i*3+2] = z; } posAttribute.needsUpdate = true; }
 const forestGroup = new THREE.Group(); scene.add(forestGroup); forestGroup.visible = false; const treeGeometries = []; for (let i = 0; i < 50; i++) { const height = 1 + Math.random() * 2; const radius = 0.2 + Math.random() * 0.3; const treeGeo = new THREE.ConeGeometry(radius, height, 4, 1, true); const x = (Math.random() - 0.5) * 20; const z = (Math.random() - 0.5) * 10 - 5; treeGeo.translate(x, height / 2, z); treeGeometries.push(treeGeo); } const forestMaterial = new THREE.ShaderMaterial({ uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color('#ff0000') }, uScanHeight: { value: -5.0 } }, vertexShader: `varying vec3 vPos; void main() { vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`, fragmentShader: `uniform vec3 uColor; uniform float uScanHeight; varying vec3 vPos; void main() { vec3 color = uColor * 0.2; float scanWidth = 0.5; float dist = abs(vPos.y - uScanHeight); if (dist < scanWidth) { float intensity = 1.0 - (dist / scanWidth); color += uColor * intensity * 2.0; } gl_FragColor = vec4(color, 1.0); }`, wireframe: true, transparent: true, blending: THREE.AdditiveBlending }); treeGeometries.forEach(geo => { const edges = new THREE.EdgesGeometry(geo); const line = new THREE.LineSegments(edges, forestMaterial); forestGroup.add(line); });
 const constellationGroup = new THREE.Group(); scene.add(constellationGroup); constellationGroup.visible = false; const starTotal = 200; const starGeo = new THREE.BufferGeometry(); const starPos = new Float32Array(starTotal * 3); for(let i=0; i<starTotal; i++) { starPos[i*3] = (Math.random() - 0.5) * 50; starPos[i*3+1] = (Math.random() - 0.5) * 30 + 10; starPos[i*3+2] = (Math.random() - 0.5) * 20 - 10; } starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true }); const stars = new THREE.Points(starGeo, starMaterial); constellationGroup.add(stars); const jaguarPoints = [ new THREE.Vector3(-5, 12, -15), new THREE.Vector3(-2, 14, -15), new THREE.Vector3(2, 13, -15), new THREE.Vector3(5, 10, -15), new THREE.Vector3(3, 8, -15), new THREE.Vector3(-1, 9, -15), new THREE.Vector3(-4, 7, -15) ]; const jaguarGeo = new THREE.BufferGeometry().setFromPoints(jaguarPoints); const jaguarLine = new THREE.Line(jaguarGeo, new THREE.LineBasicMaterial({ color: 0xa8dadc, transparent: true, opacity: 0.5 })); constellationGroup.add(jaguarLine);
+
+// --- Cometas (Shooting Stars) ---
+const cometCount = CONFIG.cometCount; const comets = []; const cometGeo = new THREE.PlaneGeometry(0.8, 15); const cometMat = new THREE.ShaderMaterial({ uniforms: { uColorHead: { value: new THREE.Color(0xffffff) }, uColorTail: { value: new THREE.Color(0x4b0082) }, uTime: { value: 0 } }, vertexShader: `varying vec2 vUv; void main() { vUv = uv; vec3 pos = position; mat3 rotX = mat3(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0); pos = rotX * pos; gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0); }`, fragmentShader: `uniform vec3 uColorHead; uniform vec3 uColorTail; varying vec2 vUv; void main() { float intensity = pow(vUv.y, 2.0); vec3 finalColor = mix(uColorTail, uColorHead, intensity); float alpha = smoothstep(0.0, 0.2, vUv.y) * (1.0 - abs(vUv.x - 0.5) * 2.0); gl_FragColor = vec4(finalColor, alpha); }`, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+function resetComet(comet) { comet.position.z = -150 - Math.random() * 100; comet.position.x = (Math.random() - 0.5) * 200; comet.position.y = (Math.random() - 0.5) * 100 + 30; comet.userData.speed = 0.5 + Math.random() * 1.5; comet.rotation.z = (Math.random() - 0.5) * 0.5; comet.rotation.y = (Math.random() - 0.5) * 0.2; }
+for (let i = 0; i < cometCount; i++) { const comet = new THREE.Mesh(cometGeo, cometMat.clone()); resetComet(comet); comet.position.z = -50 - Math.random() * 200; constellationGroup.add(comet); comets.push(comet); }
+
+// --- DANÇA DA VIDA (Espíritos Ancestrais Indígenas) ---
+const danceParticleCount = CONFIG.danceParticleCount; 
+const danceGeo = new THREE.BufferGeometry();
+const dancePos = new Float32Array(danceParticleCount * 3);
+const danceAttr = new Float32Array(danceParticleCount * 3); // [DancerID, BodyPartID, Randomness]
+const dancer1Center = new THREE.Vector3(-1.2, 0.0, -3); // Mais próximos e menores
+const dancer2Center = new THREE.Vector3(1.2, 0.0, -3);  
+
+for (let i = 0; i < danceParticleCount; i++) {
+    const dancerId = i < danceParticleCount / 2 ? 0 : 1;
+    const center = dancerId === 0 ? dancer1Center : dancer2Center;
+    
+    // Definição de partes do corpo para visual indígena
+    const bodyPartRand = Math.random();
+    let bodyPartId = 0; // 0: Torso
+    if (bodyPartRand > 0.90) bodyPartId = 1;      // 1: Cabeça
+    else if (bodyPartRand > 0.85) bodyPartId = 4; // 4: Cocar (Novo)
+    else if (bodyPartRand > 0.65) bodyPartId = 2; // 2: Braços/Adereços
+    else if (bodyPartRand > 0.30) bodyPartId = 3; // 3: Pernas/Saia
+
+    // Escala reduzida (0.6x do original) para ficarem menores
+    let xOffset = (Math.random() - 0.5) * 0.5;
+    let yOffset = (Math.random() - 0.5) * 0.9;
+    let zOffset = (Math.random() - 0.5) * 0.5;
+
+    if (bodyPartId === 1) { yOffset += 0.9; xOffset *= 0.4; zOffset *= 0.4; } // Cabeça
+    if (bodyPartId === 4) { yOffset += 1.2; xOffset *= 1.5; zOffset *= 0.5; } // Cocar (Largo e alto)
+    if (bodyPartId === 2) { xOffset *= 1.8; yOffset += 0.2; } // Braços abertos
+    if (bodyPartId === 3) { yOffset -= 0.6; xOffset *= 1.2; zOffset *= 1.2; } // Saia/Pernas
+
+    dancePos[i*3] = center.x + xOffset;
+    dancePos[i*3+1] = center.y + yOffset;
+    dancePos[i*3+2] = center.z + zOffset;
+
+    danceAttr[i*3] = dancerId;
+    danceAttr[i*3+1] = bodyPartId;
+    danceAttr[i*3+2] = Math.random(); 
+}
+danceGeo.setAttribute('position', new THREE.BufferAttribute(dancePos, 3));
+danceGeo.setAttribute('danceAttr', new THREE.BufferAttribute(danceAttr, 3));
+
+const danceMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        uTime: { value: 0 },
+        uColor1: { value: CONFIG.colors.gold },      
+        uColor2: { value: CONFIG.colors.spiritBlue },
+        uOpacity: { value: 0.0 } 
+    },
+    vertexShader: `
+        uniform float uTime; attribute vec3 danceAttr; varying float vAlpha; varying float vDancerId;
+        float hash(float n) { return fract(sin(n) * 43758.5453123); }
+        float noise(vec3 x) { vec3 p = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f); float n = p.x + p.y * 57.0 + 113.0 * p.z; return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x), mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y), mix(mix(hash(n + 113.0), hash(n + 114.0), f.x), mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z); }
+        void main() {
+            vec3 pos = position;
+            float dancerId = danceAttr.x;
+            float bodyPartId = danceAttr.y;
+            float rnd = danceAttr.z;
+            float t = uTime * 1.5;
+
+            // Lógica de Movimento Ancestral
+            vec3 danceOffset = vec3(0.0);
+
+            if (dancerId < 0.5) { 
+                // GUERREIRO
+                if (bodyPartId == 4.0) { // Cocar balançando
+                     danceOffset.x = sin(t*0.8 + pos.y)*0.1; 
+                     danceOffset.z = cos(t*0.8)*0.05; 
+                }
+                else if (bodyPartId < 0.5) { danceOffset.x = sin(t*0.8)*0.1; danceOffset.y = cos(t*1.6)*0.05; } // Torso
+                else if (bodyPartId < 1.5) { danceOffset.x = sin(t*0.8)*0.15; } // Cabeça
+                else if (bodyPartId < 2.5) { danceOffset.x = sin(t*1.2 + rnd)*0.4; danceOffset.y = cos(t*1.2 + rnd)*0.2; } // Braços
+                else { danceOffset.y = abs(sin(t*2.0 + rnd))*0.2; danceOffset.z = cos(t*1.0 + rnd)*0.15; } // Pernas
+            } else {
+                // FLUIDEZ (Estilo Moana)
+                if (bodyPartId == 4.0) { // Cocar/Cabelo flutuando
+                    danceOffset.x = sin(t + pos.y)*0.15; 
+                    danceOffset.y = cos(t*1.2)*0.1; 
+                }
+                else if (bodyPartId < 0.5) { danceOffset.x = sin(t)*0.1; danceOffset.z = cos(t)*0.1; } // Torso
+                else if (bodyPartId < 1.5) { danceOffset.y = sin(t*1.5 + rnd)*0.05; } // Cabeça
+                else if (bodyPartId < 2.5) { danceOffset.x = sin(t*1.1 + rnd*2.0)*0.3; danceOffset.y = cos(t*1.3 + rnd)*0.2; danceOffset.z = sin(t*0.7)*0.2; } // Braços
+                else { // Saia rodada
+                    float angle = t * 2.0 + rnd * 6.28; 
+                    float radius = 0.5 + rnd * 0.2; 
+                    danceOffset.x = cos(angle)*radius; 
+                    danceOffset.z = sin(angle)*radius; 
+                    danceOffset.y = sin(t*1.5 + rnd)*0.1; 
+                }
+            }
+
+            // Ruído de "Espírito"
+            vec3 noiseOffset = vec3(noise(pos * 0.8 + t * 0.5), noise(pos * 0.8 + t * 0.6 + 10.0), noise(pos * 0.8 + t * 0.7 + 20.0));
+            pos += danceOffset + noiseOffset * 0.2;
+
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            
+            // Tamanho das partículas
+            float sizeMult = (bodyPartId == 4.0) ? 2.5 : 1.5; // Cocar mais destacado
+            gl_PointSize = (2.0 + rnd * 4.0) * sizeMult * (10.0 / -mvPosition.z);
+            
+            vAlpha = 0.5 + 0.5 * rnd;
+            vDancerId = dancerId;
+        }
+    `,
+    fragmentShader: `
+        uniform vec3 uColor1; uniform vec3 uColor2; uniform float uOpacity; varying float vAlpha; varying float vDancerId;
+        void main() {
+            float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0);
+            vec3 finalColor = mix(uColor1, uColor2, step(0.5, vDancerId));
+            finalColor += vec3(0.3) * glow; // Brilho extra
+            gl_FragColor = vec4(finalColor, vAlpha * glow * uOpacity);
+        }
+    `,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+});
+const danceSystem = new THREE.Points(danceGeo, danceMaterial);
+danceSystem.position.set(0, -1, 0); 
+scene.add(danceSystem);
+
 const cursorDot = document.querySelector('.cursor-dot'); const cursorOutline = document.querySelector('.cursor-outline'); window.addEventListener('mousemove', (e) => { const posX = e.clientX; const posY = e.clientY; if(cursorDot) { cursorDot.style.left = `${posX}px`; cursorDot.style.top = `${posY}px`; } if(cursorOutline) cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" }); mouseX = e.clientX / window.innerWidth - 0.5; mouseY = e.clientY / window.innerHeight - 0.5; gsap.to(particles.rotation, { x: mouseY * 0.2, y: mouseX * 0.2 + (clock.getElapsedTime() * 0.05), duration: 1 }); });
 
 // =========================================================================
@@ -290,9 +416,13 @@ function animate() {
     if (ashMaterial.uniforms) ashMaterial.uniforms.uTime.value = elapsedTime;
     if (sparkMaterial.uniforms) sparkMaterial.uniforms.uTime.value = elapsedTime;
     if (cocarMaterial.uniforms) cocarMaterial.uniforms.uTime.value = elapsedTime;
+    if (cometMat.uniforms) cometMat.uniforms.uTime.value = elapsedTime;
+    if (danceMaterial.uniforms) danceMaterial.uniforms.uTime.value = elapsedTime;
 
     if (particles) particles.rotation.y = elapsedTime * 0.05;
     if (leafParticles) leafParticles.rotation.y = elapsedTime * 0.02;
+    // Sincronização: Dança gira junto com o ambiente (pedido do usuário)
+    if (danceSystem) danceSystem.rotation.y = elapsedTime * 0.05;
 
     if (fireflies) {
         const fPositions = fireflies.geometry.attributes.position.array; const fRandoms = fireflies.geometry.attributes.aRandom.array;
@@ -321,8 +451,18 @@ function animate() {
 
     if (typeof forestGroup !== 'undefined' && forestGroup.visible) forestMaterial.uniforms.uScanHeight.value = Math.sin(elapsedTime) * 2 + 1;
     
+    // Animação da Constelação e Cometas
+    if (typeof constellationGroup !== 'undefined' && constellationGroup.visible) { 
+        constellationGroup.rotation.z = Math.sin(elapsedTime * 0.1) * 0.05; 
+        if (typeof comets !== 'undefined') {
+            comets.forEach(comet => {
+                comet.position.z += comet.userData.speed;
+                if (comet.position.z > 10) { resetComet(comet); }
+            });
+        }
+    }
+
     if (typeof artifactGroup !== 'undefined' && artifactGroup.visible) { artifactGroup.rotation.y += 0.005; pottery.rotation.z = Math.sin(elapsedTime * 0.5) * 0.1; }
-    if (typeof constellationGroup !== 'undefined' && constellationGroup.visible) { constellationGroup.rotation.z = Math.sin(elapsedTime * 0.1) * 0.05; }
     
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
@@ -343,9 +483,7 @@ const knowledgeSection = document.querySelector('.knowledge-section');
 const knowledgeContainer = document.querySelector('.knowledge-container');
 
 if (knowledgeSection && knowledgeContainer) { 
-    // Calcula a largura total para o scroll horizontal
     const scrollAmount = knowledgeContainer.scrollWidth - window.innerWidth;
-
     gsap.to(knowledgeContainer, { 
         x: -scrollAmount, 
         ease: "none", 
@@ -358,6 +496,10 @@ if (knowledgeSection && knowledgeContainer) {
             invalidateOnRefresh: true, 
             onEnter: () => { 
                 gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 1 });
+                gsap.to(sparkMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 });
+                gsap.to(ashMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 });
+                gsap.to(scene.fog.color, { r: 0.02, g: 0.02, b: 0.02, duration: 1 }); 
+                gsap.to(material.uniforms.uColor.value, { r: CONFIG.colors.gold.r, g: CONFIG.colors.gold.g, b: CONFIG.colors.gold.b, duration: 1 });
             }, 
             onLeave: () => { 
                 gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 1 });
@@ -414,7 +556,32 @@ ScrollTrigger.create({
 
 tl.to(material.uniforms.uColor.value, { r: 0.0, g: 0.0, b: 0.2, duration: 1, ease: smoothEase }, "step_cosmology").to(material.uniforms.uFormFactor, { value: 0.0, duration: 1, ease: smoothEase }, "step_cosmology").to(camera.position, { z: 2, y: 5, duration: 1, ease: smoothEase }, "step_cosmology").to(camera.rotation, { x: 0.5, duration: 1, ease: smoothEase }, "step_cosmology");
 ScrollTrigger.create({ trigger: "#chapter-cosmology", start: "top center", end: "bottom center", onEnter: () => { if(constellationGroup) constellationGroup.visible = true; gsap.to(scene.fog, { density: 0.0, duration: 1 }); }, onLeave: () => { if(constellationGroup) constellationGroup.visible = false; gsap.to(scene.fog, { density: 0.02, duration: 1 }); }, onEnterBack: () => { if(constellationGroup) constellationGroup.visible = true; gsap.to(scene.fog, { density: 0.0, duration: 1 }); }, onLeaveBack: () => { if(constellationGroup) constellationGroup.visible = false; gsap.to(scene.fog, { density: 0.02, duration: 1 }); } });
-tl.to(camera.rotation, { x: 0, duration: 1, ease: smoothEase }, "step_reset_cam"); tl.to(material.uniforms.uColor.value, { r: 0.2, g: 0.1, b: 0.05, duration: 1, ease: smoothEase }, "step_heroes").to(material.uniforms.uFormFactor, { value: 1.0, duration: 1, ease: smoothEase }, "step_heroes").to(camera.position, { z: 4, y: 1, duration: 1, ease: smoothEase }, "step_heroes"); tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.celebration.r, g: CONFIG.colors.celebration.g, b: CONFIG.colors.celebration.b, duration: 1, ease: smoothEase }, "step4").to(material.uniforms.uFormFactor, { value: 1.5, duration: 1, ease: smoothEase }, "step4").to(camera.position, { z: 5, y: 2, duration: 1, ease: smoothEase }, "step4"); tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.future.r, g: CONFIG.colors.future.g, b: CONFIG.colors.future.b, duration: 1, ease: smoothEase }, "step5").to(material.uniforms.uFormFactor, { value: 0.5, duration: 1, ease: smoothEase }, "step5").to(camera.position, { z: 6, y: 3, duration: 1, ease: smoothEase }, "step5");
+tl.to(camera.rotation, { x: 0, duration: 1, ease: smoothEase }, "step_reset_cam"); tl.to(material.uniforms.uColor.value, { r: 0.2, g: 0.1, b: 0.05, duration: 1, ease: smoothEase }, "step_heroes").to(material.uniforms.uFormFactor, { value: 1.0, duration: 1, ease: smoothEase }, "step_heroes").to(camera.position, { z: 4, y: 1, duration: 1, ease: smoothEase }, "step_heroes"); 
+
+// --- CELEBRAÇÃO (Dança da Vida) ---
+tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.celebration.r, g: CONFIG.colors.celebration.g, b: CONFIG.colors.celebration.b, duration: 1, ease: smoothEase }, "step4")
+.to(material.uniforms.uFormFactor, { value: 1.5, duration: 1, ease: smoothEase }, "step4")
+.to(camera.position, { z: 5, y: 2, duration: 1, ease: smoothEase }, "step4");
+
+ScrollTrigger.create({
+    trigger: "#chapter-celebration",
+    start: "top center",
+    end: "bottom center",
+    onEnter: () => {
+        gsap.to(danceMaterial.uniforms.uOpacity, { value: 1.0, duration: 1.5 });
+    },
+    onLeave: () => {
+        gsap.to(danceMaterial.uniforms.uOpacity, { value: 0.0, duration: 1.0 });
+    },
+    onEnterBack: () => {
+        gsap.to(danceMaterial.uniforms.uOpacity, { value: 1.0, duration: 1.5 });
+    },
+    onLeaveBack: () => {
+        gsap.to(danceMaterial.uniforms.uOpacity, { value: 0.0, duration: 1.0 });
+    }
+});
+
+tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.future.r, g: CONFIG.colors.future.g, b: CONFIG.colors.future.b, duration: 1, ease: smoothEase }, "step5").to(material.uniforms.uFormFactor, { value: 0.5, duration: 1, ease: smoothEase }, "step5").to(camera.position, { z: 6, y: 3, duration: 1, ease: smoothEase }, "step5");
 
 // UI - SLIDER E MODAL
 const modalOverlay = document.querySelector('.modal-overlay'); const closeBtn = document.querySelector('.close-modal'); const knowledgeCards = document.querySelectorAll('.knowledge-card'); const slides = document.querySelectorAll('.custom-slide'); const prevBtn = document.querySelector('.prev-btn'); const nextBtn = document.querySelector('.next-btn'); const dotsContainer = document.querySelector('.slider-dots'); let currentSlideIndex = 0;

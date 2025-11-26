@@ -285,6 +285,7 @@ main {
 }
 
 /* --- Knowledge Stack Section (CORRIGIDO) --- */
+/* Knowledge Stack Section */
 .knowledge-section {
     height: 100vh;
     width: 100%;
@@ -292,171 +293,103 @@ main {
     display: flex;
     align-items: center;
     position: relative;
-    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
+    /* Removemos o fundo escuro chapado para integrar melhor */
+    background: transparent; 
 }
 
 .knowledge-container {
     display: flex;
-    flex-wrap: nowrap; /* Garante que fiquem em linha reta */
+    flex-wrap: nowrap;
     padding-left: 10vw;
-    gap: 6vw;
-    width: max-content; /* Permite que cresça além da tela */
-    will-change: transform; /* Otimiza performance */
+    gap: 8vw; /* Mais espaço entre eles */
+    width: max-content;
+    will-change: transform;
+    align-items: center; /* Centraliza o eixo Y para o desalinhamento funcionar bem */
 }
 
 .knowledge-card {
-    min-width: 400px; /* Garante que não fiquem pequenos demais */
-    width: 25vw;
-    height: 60vh;
-    flex-shrink: 0;   /* Impede o card de ser espremido */
+    min-width: 380px;
+    width: 22vw;
+    height: 55vh;
+    flex-shrink: 0;
     
     background-size: cover;
     background-position: center;
-    border-radius: 15px;
+    border-radius: 20px; /* Mais arredondado */
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
+    
+    /* Efeito de vidro sutil nas bordas */
+    border: 1px solid rgba(255, 215, 0, 0.1); 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* EFEITO SOLTO: Desalinha os cards pares */
+.knowledge-card:nth-child(even) {
+    transform: translateY(40px); /* Empurra para baixo */
+}
+.knowledge-card:nth-child(odd) {
+    transform: translateY(-40px); /* Puxa para cima */
+}
+
+/* Hover: Traz o card para o centro e destaca */
 .knowledge-card:hover {
-    transform: translateY(-20px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    transform: translateY(0) scale(1.05) !important; /* Reseta o desalinhamento ao passar o mouse */
     border-color: var(--accent-color);
+    box-shadow: 0 30px 60px rgba(212, 163, 115, 0.2);
     z-index: 10;
 }
 
+/* ... (O resto do CSS interno do card: .card-overlay, .card-content, etc. permanece igual) ... */
 .card-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.95) 100%);
     transition: opacity 0.3s ease;
 }
-
 .knowledge-card:hover .card-overlay {
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.95) 100%);
 }
-
 .card-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 2.5rem;
-    z-index: 2;
-    transform: translateY(20px);
-    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    position: absolute; bottom: 0; left: 0; width: 100%; padding: 2.5rem; z-index: 2;
+    transform: translateY(20px); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
-
-.knowledge-card:hover .card-content {
-    transform: translateY(0);
-}
-
+.knowledge-card:hover .card-content { transform: translateY(0); }
 .card-number {
-    font-family: 'Cinzel', serif;
-    font-size: 4rem;
-    color: rgba(255,255,255,0.1);
-    position: absolute;
-    top: -3rem;
-    right: 2rem;
-    font-weight: 700;
-    transition: all 0.5s ease;
+    font-family: 'Cinzel', serif; font-size: 4rem; color: rgba(255,255,255,0.1);
+    position: absolute; top: -3rem; right: 2rem; font-weight: 700; transition: all 0.5s ease;
 }
-
-.knowledge-card:hover .card-number {
-    color: rgba(212, 163, 115, 0.2);
-    transform: translateY(-10px);
-}
-
+.knowledge-card:hover .card-number { color: rgba(212, 163, 115, 0.2); transform: translateY(-10px); }
 .knowledge-card h2 {
-    font-family: 'Cinzel', serif;
-    color: #fff;
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    position: relative;
-    display: inline-block;
+    font-family: 'Cinzel', serif; color: #fff; font-size: 1.8rem; margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8); position: relative; display: inline-block;
 }
-
 .knowledge-card h2::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 0;
-    height: 2px;
-    background-color: var(--accent-color);
-    transition: width 0.3s ease;
+    content: ''; position: absolute; left: 0; bottom: -5px; width: 0; height: 2px;
+    background-color: var(--accent-color); transition: width 0.3s ease;
 }
-
-.knowledge-card:hover h2::after {
-    width: 100%;
-}
-
+.knowledge-card:hover h2::after { width: 100%; }
 .knowledge-card p {
-    font-size: 1rem;
-    color: #ccc;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    opacity: 0.8;
-    transform: translateY(10px);
-    transition: all 0.5s ease 0.1s;
+    font-size: 1rem; color: #ccc; line-height: 1.6; margin-bottom: 1.5rem; opacity: 0.8;
+    transform: translateY(10px); transition: all 0.5s ease 0.1s;
 }
-
-.knowledge-card:hover p {
-    opacity: 1;
-    transform: translateY(0);
-    color: #fff;
-}
-
+.knowledge-card:hover p { opacity: 1; transform: translateY(0); color: #fff; }
 .card-action {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--accent-color);
-    font-family: 'Cinzel', serif;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.5s ease 0.2s;
+    display: flex; align-items: center; gap: 10px; color: var(--accent-color);
+    font-family: 'Cinzel', serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em;
+    opacity: 0; transform: translateY(10px); transition: all 0.5s ease 0.2s;
 }
-
-.knowledge-card:hover .card-action {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.card-action .arrow {
-    transition: transform 0.3s ease;
-}
-
-.knowledge-card:hover .card-action .arrow {
-    transform: translateX(5px);
-}
+.knowledge-card:hover .card-action { opacity: 1; transform: translateY(0); }
+.card-action .arrow { transition: transform 0.3s ease; }
+.knowledge-card:hover .card-action .arrow { transform: translateX(5px); }
 
 @media (max-width: 768px) {
-    .knowledge-card {
-        min-width: 85vw;
-        height: 60vh;
-        padding: 0;
-    }
-    
-    .card-content {
-        transform: translateY(0);
-        padding: 1.5rem;
-    }
-    
-    .card-action {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    .knowledge-card { min-width: 85vw; height: 60vh; padding: 0; }
+    .knowledge-card:nth-child(even), .knowledge-card:nth-child(odd) { transform: none; } /* Remove ziguezague no mobile */
+    .card-content { transform: translateY(0); padding: 1.5rem; }
+    .card-action { opacity: 1; transform: translateY(0); }
 }
 
 /* Full Screen Modal */
