@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ecos Ancestrais - Uma jornada imersiva pela cultura, história e resistência dos povos indígenas do Brasil.">
-    <meta name="keywords" content="indígenas, brasil, cultura, história, resistência, amazônia, arte, cosmologia">
-    <meta name="author" content="Ecos Ancestrais">
-    <meta property="og:title" content="Ecos Ancestrais - Uma Jornada Indígena">
-    <meta property="og:description" content="Explore a sabedoria, a arte e a luta dos povos originários em uma experiência web imersiva.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop">
-    <meta property="og:type" content="website">
-    
     <title>Ecos Ancestrais - Uma Jornada Indígena</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
-    <!-- Import map for Three.js and GSAP -->
     <script type="importmap">
         {
             "imports": {
@@ -31,7 +21,6 @@
     </script>
 </head>
 <body>
-    <!-- Preloader -->
     <div id="preloader">
         <div class="loader-content">
             <div class="loader-spinner"></div>
@@ -41,58 +30,50 @@
 
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Custom Cursor -->
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
 
-    <!-- Full Screen Modal with Custom Slider -->
     <div class="modal-overlay">
         <button class="close-modal">&times;</button>
-        
         <div class="custom-slider">
             <div class="slider-track">
-                <!-- Slide 0 -->
                 <div class="custom-slide" data-index="0">
                     <div class="slide-content">
                         <div class="slide-text">
                             <h2>Saberes da Floresta</h2>
-                            <p>A arte e os rituais indígenas são expressões profundas de identidade, espiritualidade e conexão com a natureza. A pintura corporal, a cerâmica e a arte plumária carregam significados simbólicos que representam tradições, crenças e pertencimento a um grupo. Já os rituais fortalecem os laços comunitários, marcam momentos sagrados e mantêm viva a herança cultural transmitida de geração em geração.</p>
+                            <p>A arte e os rituais indígenas são expressões profundas de identidade...</p>
                         </div>
                         <div class="slide-visual visual-medicine"></div>
                     </div>
                 </div>
-                <!-- Slide 1 -->
                 <div class="custom-slide" data-index="1">
                     <div class="slide-content">
                         <div class="slide-text">
                             <h2>Artes e Rituais</h2>
-                            <p>Os saberes da floresta refletem o profundo conhecimento que os povos indígenas têm da natureza. Eles utilizam plantas medicinais para curar doenças, conhecem os ciclos das águas e das estações, e aplicam técnicas sustentáveis de caça e pesca que garantem o equilíbrio do meio ambiente. Esses conhecimentos são transmitidos oralmente, preservando a harmonia entre o ser humano e a floresta.</p>
+                            <p>Os saberes da floresta refletem o profundo conhecimento...</p>
                         </div>
                         <div class="slide-visual visual-language"></div>
                     </div>
                 </div>
-                <!-- Slide 2 -->
                 <div class="custom-slide" data-index="2">
                     <div class="slide-content">
                         <div class="slide-text">
                             <h2>Organização Social</h2>
-                            <p>A organização social dos povos indígenas baseia-se na coletividade e na cooperação entre os membros da aldeia. Os laços familiares são fundamentais, pois garantem a união e a transmissão de valores e tradições. O cacique exerce o papel de líder e mediador, guiando a comunidade com sabedoria e promovendo o bem-estar coletivo, sempre em harmonia com as decisões do grupo.</p>
+                            <p>A organização social baseia-se na coletividade...</p>
                         </div>
                         <div class="slide-visual visual-art"></div>
                     </div>
                 </div>
-                <!-- Slide 3 -->
                 <div class="custom-slide" data-index="3">
                     <div class="slide-content">
                         <div class="slide-text">
                             <h2>Cosmologia</h2>
-                            <p>O céu é um mapa. As constelações contam histórias de caça, plantio e a origem de todas as coisas. Para os indígenas, não há separação entre o céu e a terra, tudo é um grande ciclo cósmico onde estrelas são ancestrais que nos observam.</p>
+                            <p>O céu é um mapa. As constelações contam histórias...</p>
                         </div>
                         <div class="slide-visual visual-cosmos"></div>
                     </div>
                 </div>
             </div>
-
             <div class="slider-nav">
                 <button class="nav-btn prev-btn">←</button>
                 <div class="slider-dots"></div>
@@ -103,296 +84,195 @@
 
     <main class="narrative-container">
         
-        <!-- Chapter 1: Origin -->
         <section class="chapter" id="chapter-origin">
             <div class="chapter-marker">Capítulo I</div>
-            <h1 class="chapter-title" data-text="O Sonho da Floresta">A Chegada dos Jesuítas ao Brasil</h1>
-            
+            <h1 class="chapter-title" data-text="A Chegada">A Chegada dos Jesuítas</h1>
             <div class="text-block left sway-text">
-                <p><span class="drop-cap">O</span>primeiro capítulo explora a chegada dos jesuítas ao Brasil no século XVI e como seus primeiros encontros com os povos indígenas moldaram as bases da relação entre as duas culturas.</p>
-            </div>
-
-            <div class="text-block right sway-text" style="animation-delay: 1s;">
-                <p>A narrativa inicial foi marcada por tensões, trocas culturais e um processo de adaptação mútua, que abriria caminho para os seguintes conflitos e colaborações.</p>
+                <p><span class="drop-cap">O</span> primeiro capítulo explora a chegada dos jesuítas...</p>
             </div>
         </section>
 
-        <!-- Chapter 2: Connection -->
         <section class="chapter" id="chapter-connection">
             <div class="chapter-marker">Capítulo II</div>
-            <h1 class="chapter-title" data-text="Sangue e Seiva">O Papel dos Jesuítas na Organização das Missões</h1>
-
-            <div class="text-block center sway-text" style="animation-delay: 2s;">
-                <p>Neste capítulo, analisamos a atuação dos jesuítas nas missões, que foram fundamentais para a organização social, religiosa e econômica das aldeias indígenas.</p>
-            </div>
-
-            <div class="text-block left sway-text" style="animation-delay: 0.5s;">
-                <p>A criação das reduções no interior paulista representa um aspecto crucial de resistência e preservação cultural, mas também de controle e doutrinação.</p>
+            <h1 class="chapter-title" data-text="Missões">Organização das Missões</h1>
+            <div class="text-block center sway-text">
+                <p>A atuação dos jesuítas nas missões foi fundamental...</p>
             </div>
         </section>
 
-        <!-- Chapter 3: Territory -->
         <section class="chapter" id="chapter-territory">
             <div class="chapter-marker">Capítulo III</div>
-            <h1 class="chapter-title" data-text="O Território Sagrado">Indígenas e Jesuitismo: O Processo de Aculturação e Resistência</h1>
-
-            <div class="text-block right sway-text" style="animation-delay: 1.5s;">
-                <p>Aqui, discutimos como os indígenas, por meio do contato com os jesuítas, passaram por processos de aculturação religiosa e social. Contudo, esse movimento foi também marcado por formas de resistência, tanto explícitas quanto sutis, que ajudaram a preservar aspectos da cultura indígena em meio à imposição de valores europeus.</p>
+            <h1 class="chapter-title" data-text="Aculturação">Aculturação e Resistência</h1>
+            <div class="text-block right sway-text">
+                <p>Discutimos como os indígenas passaram por processos de aculturação...</p>
             </div>
         </section>
 
-        <!-- Chapter 3.5: Artifacts (New) -->
         <section class="chapter" id="chapter-artifacts">
             <div class="chapter-marker">Capítulo IV</div>
-            <h1 class="chapter-title" data-text="Mãos que Criam">A Violência e os Conflitos no Encontro de Mundos</h1>
-
+            <h1 class="chapter-title" data-text="Conflitos">Violência e Conflitos</h1>
             <div class="text-block left sway-text">
-                <p>O quarto capítulo aborda as tensões entre os indígenas e os colonizadores portugueses, muitas vezes exacerbadas pela intervenção dos jesuítas. A presença desses missionários não impediu os conflitos armados, mas ofereceu uma perspectiva única de mediação e controle das disputas, influenciando a maneira como essas histórias foram registradas.</p>
+                <p>As tensões entre indígenas e colonizadores...</p>
             </div>
         </section>
 
-        <!-- Chapter 4: Resistance -->
         <section class="chapter" id="chapter-resistance">
             <div class="chapter-marker">Capítulo V</div>
-            <h1 class="chapter-title" data-text="A Tempestade">A Educação nas Reduções: Jesuítas e a Formação de uma Nova Identidade Indígena</h1>
-
+            <h1 class="chapter-title" data-text="Educação">A Educação nas Reduções</h1>
             <div class="text-block center sway-text">
-                <p class="emphasis">Investigamos o papel da educação nas missões jesuíticas e como ela foi usada para promover uma identidade cristã entre os indígenas.</p>
-            </div>
-
-            <div class="text-block left sway-text" style="animation-delay: 1s;">
-                <p>A alfabetização e a formação religiosa foram vistas como ferramentas para a integração dos povos nativos ao projeto colonial, mas também serviram para reforçar a submissão ao domínio europeu.</p>
+                <p class="emphasis">Investigamos o papel da educação nas missões...</p>
             </div>
         </section>
 
-        <!-- Chapter 5: The Burning -->
         <section class="chapter" id="chapter-fire">
             <div class="chapter-marker">Capítulo VI</div>
-            <h1 class="chapter-title" data-text="Cinzas e Brasas">A Expulsão dos Jesuítas e a Desintegração das Missões</h1>
-            
-            <div class="text-block center sway-text">
-                <p class="emphasis">Em 1759, a expulsão dos jesuítas pelo Marquês de Pombal marcou um ponto de inflexão. As missões jesuíticas, até então centros de organização e resistência, sofreram um colapso.</p>
-            </div>
-
-            <div class="text-block right sway-text" style="animation-delay: 0.5s;">
-                <p>As consequências dessa expulsão para os indígenas e as transformações que ocorreram nas estruturas sociais e culturais das reduções.</p>
+            <h1 class="chapter-title" data-text="Expulsão">A Expulsão dos Jesuítas</h1>
+            <div class="text-block right sway-text">
+                <p>Em 1759, a expulsão dos jesuítas marcou um ponto de inflexão...</p>
             </div>
         </section>
 
-        <!-- Knowledge Stack (Kept as an interlude) -->
         <section class="knowledge-section" id="knowledge-stack">
             <div class="knowledge-container">
-                <div class="knowledge-card" style="background-image: url('../tcc-main/assents/audio/sabares.png');">
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop');">
                     <div class="card-overlay"></div>
                     <div class="card-content">
                         <div class="card-number">01</div>
-                        <h2>Saberes da Floresta</h2>
-                        <p>Os saberes da floresta refletem o profundo conhecimento que os povos indígenas têm da natureza. Eles utilizam plantas medicinais para curar doenças, conhecem os ciclos das águas e das estações, e aplicam técnicas sustentáveis de caça e pesca que garantem o equilíbrio do meio ambiente. Esses conhecimentos são transmitidos oralmente, preservando a harmonia entre o ser humano e a floresta.</p>
-                        <div class="card-action">
-                            <span>Explorar</span>
-                            <span class="arrow">→</span>
-                        </div>
+                        <h2>Saberes</h2>
+                        <p>Conhecimentos profundos da natureza.</p>
+                        <div class="card-action"><span>Explorar</span><span class="arrow">→</span></div>
                     </div>
                 </div>
-                <div class="knowledge-card" style="background-image: url('../tcc-main/assents/audio/arte\ e\ rituais.png');">
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1534531173927-aeb928d54385?q=80&w=1000&auto=format&fit=crop');">
                     <div class="card-overlay"></div>
                     <div class="card-content">
                         <div class="card-number">02</div>
-                        <h2>Arte e Rituais</h2>
-                        <p>A arte e os rituais indígenas são expressões profundas de identidade, espiritualidade e conexão com a natureza. A pintura corporal, a cerâmica e a arte plumária carregam significados simbólicos que representam tradições, crenças e pertencimento a um grupo. Já os rituais fortalecem os laços comunitários, marcam momentos sagrados e mantêm viva a herança cultural transmitida de geração em geração.</p>
-                        <div class="card-action">
-                            <span>Explorar</span>
-                            <span class="arrow">→</span>
-                        </div>
+                        <h2>Arte</h2>
+                        <p>Expressões de identidade e espírito.</p>
+                        <div class="card-action"><span>Explorar</span><span class="arrow">→</span></div>
                     </div>
                 </div>
-                <div class="knowledge-card" style="background-image: url('../tcc-main/assents/audio/organizacao.png');">
+                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=1000&auto=format&fit=crop');">
                     <div class="card-overlay"></div>
                     <div class="card-content">
                         <div class="card-number">03</div>
-                        <h2>Organização Social</h2>
-                        <p>A organização social dos povos indígenas baseia-se na coletividade e na cooperação entre os membros da aldeia. Os laços familiares são fundamentais, pois garantem a união e a transmissão de valores e tradições. O cacique exerce o papel de líder e mediador, guiando a comunidade com sabedoria e promovendo o bem-estar coletivo, sempre em harmonia com as decisões do grupo.</p>
-                        <div class="card-action">
-                            <span>Explorar</span>
-                            <span class="arrow">→</span>
-                        </div>
+                        <h2>Social</h2>
+                        <p>A força da coletividade.</p>
+                        <div class="card-action"><span>Explorar</span><span class="arrow">→</span></div>
                     </div>
                 </div>
-                <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop');">
+                 <div class="knowledge-card" style="background-image: url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop');">
                     <div class="card-overlay"></div>
                     <div class="card-content">
                         <div class="card-number">04</div>
-                        <h2>Cosmologia</h2>
-                        <p>O céu é um mapa. As estrelas são nossos ancestrais.</p>
-                        <div class="card-action">
-                            <span>Explorar</span>
-                            <span class="arrow">→</span>
-                        </div>
+                        <h2>Cosmos</h2>
+                        <p>O céu como guia ancestral.</p>
+                        <div class="card-action"><span>Explorar</span><span class="arrow">→</span></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Chapter 5.5: Cosmology (New) -->
         <section class="chapter" id="chapter-cosmology">
             <div class="chapter-marker">Capítulo VII</div>
-            <h1 class="chapter-title" data-text="O Céu Ancestral">A Visão dos Indígenas: Narrativas Opostas na História Paulista</h1>
-
+            <h1 class="chapter-title" data-text="Visão">A Visão Indígena</h1>
             <div class="text-block center sway-text">
-                <p>Procuramos entender como os indígenas vivenciaram a presença jesuítica e como suas próprias narrativas sobre o contato com os colonizadores se contrapõem à versão escrita pelos missionários. A visão indígena oferece um ponto de vista alternativo e muitas vezes conflitante com a historiografia tradicional.</p>
+                <p>Como os indígenas vivenciaram a presença jesuítica...</p>
             </div>
         </section>
 
-        <!-- Chapter 5.8: Heroes (New) -->
         <section class="chapter heroes-section" id="chapter-heroes">
             <div class="chapter-marker">Capítulo VIII</div>
-            <h1 class="chapter-title" data-text="Vozes da Terra">Vozes da Terra</h1>
-            
+            <h1 class="chapter-title" data-text="Vozes">Vozes da Terra</h1>
             <div class="heroes-gallery">
-                <!-- Hero 1: Sepé Tiaraju -->
                 <div class="hero-card active" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/2/2b/Est%C3%A1tua_Sep%C3%A9_Tiaraju.jpg');">
-                    <div class="hero-content">
-                        <h2>Sepé Tiaraju</h2>
-                        <p class="hero-role">O Guerreiro Guarani</p>
-                        <div class="hero-details">
-                            <p>"Esta terra tem dono!" Líder da resistência Guarani nas Guerras Guaraníticas. Símbolo eterno de luta pela terra e autonomia.</p>
-                        </div>
-                    </div>
+                    <div class="hero-content"><h2>Sepé Tiaraju</h2><p class="hero-role">Guerreiro Guarani</p></div>
                 </div>
-
-                <!-- Hero 2: Raoni Metuktire -->
                 <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/4/47/Raoni_Metuktire_close-up_%28cropped%29.jpg');">
-                    <div class="hero-content">
-                        <h2>Raoni Metuktire</h2>
-                        <p class="hero-role">Líder Kayapó</p>
-                        <div class="hero-details">
-                            <p>Uma das vozes indígenas mais reconhecidas mundialmente. Dedicou sua vida à defesa da Amazônia e dos direitos dos povos originários.</p>
-                        </div>
-                    </div>
+                    <div class="hero-content"><h2>Raoni Metuktire</h2><p class="hero-role">Líder Kayapó</p></div>
                 </div>
-
-                <!-- Hero 3: Davi Kopenawa -->
                 <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/5/54/Davi_Kopenawa_Yanomami_at_2024_Cannes_Film_Festival_for_The_Falling_Sky_%28cropped%29.jpg');">
-                    <div class="hero-content">
-                        <h2>Davi Kopenawa</h2>
-                        <p class="hero-role">Xamã Yanomami</p>
-                        <div class="hero-details">
-                            <p>Autor de "A Queda do Céu". Alerta o mundo sobre os perigos da destruição da floresta e a sabedoria xamânica para segurar o céu.</p>
-                        </div>
-                    </div>
+                    <div class="hero-content"><h2>Davi Kopenawa</h2><p class="hero-role">Xamã Yanomami</p></div>
                 </div>
-
-                <!-- Hero 4: Ailton Krenak -->
                 <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/0/04/12%C2%BA_CBA_-_Confer%C3%AAncia_de_Encerramento_%2823_11_2023%29_%2853587946110%29.jpg');">
-                    <div class="hero-content">
-                        <h2>Ailton Krenak</h2>
-                        <p class="hero-role">Filósofo e Escritor</p>
-                        <div class="hero-details">
-                            <p>Pensador contemporâneo que nos ensina a "adiar o fim do mundo". Sua pintura de rosto com jenipapo no Congresso em 1987 mudou a Constituição.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hero 5: Sônia Guajajara -->
-                <div class="hero-card" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/a/a9/26.08.2025_%E2%80%93_Reuni%C3%A3o_Ministerial_-_54745615562.jpg');">
-                    <div class="hero-content">
-                        <h2>Sônia Guajajara</h2>
-                        <p class="hero-role">Liderança e Ministra</p>
-                        <div class="hero-details">
-                            <p>Primeira Ministra dos Povos Indígenas do Brasil. Uma força da natureza na política, levando a voz indígena para os espaços de poder.</p>
-                        </div>
-                    </div>
+                    <div class="hero-content"><h2>Ailton Krenak</h2><p class="hero-role">Filósofo</p></div>
                 </div>
             </div>
         </section>
 
-        <!-- Chapter 5: Celebration -->
         <section class="chapter" id="chapter-celebration">
             <div class="chapter-marker">Capítulo IX</div>
-            <h1 class="chapter-title" data-text="A Dança da Vida">O Legado das Missões Jesuíticas no Brasil Contemporâneo</h1>
-
+            <h1 class="chapter-title" data-text="Legado">O Legado das Missões</h1>
             <div class="text-block right">
-                <p>Exploramos o impacto duradouro das missões jesuíticas na formação da sociedade paulista e brasileira. O legado das reduções, apesar de sua desintegração, persiste na cultura e identidade indígenas, especialmente nas regiões mais afetadas pela colonização.</p>
+                <p>O impacto duradouro das missões na sociedade brasileira...</p>
             </div>
         </section>
 
-        <!-- Chapter 6: Future -->
         <section class="chapter" id="chapter-future">
             <div class="chapter-marker">Capítulo X</div>
-            <h1 class="chapter-title" data-text="O Amanhã Ancestral">A Historiografia Paulista e a Construção da Imagem dos Jesuítas e Indígenas</h1>
-
+            <h1 class="chapter-title" data-text="História">Historiografia Paulista</h1>
             <div class="text-block center">
-                <p>A historiografia paulista, ao longo dos séculos XIX e XX, construiu uma narrativa específica sobre os jesuítas e os indígenas. Este capítulo investiga como diferentes historiadores retrataram essas relações, frequentemente idealizando ou demonizando ambos os grupos, e como essa construção afetou a memória histórica da região.</p>
+                <p>A construção da narrativa histórica sobre jesuítas e indígenas.</p>
+            </div>
+        </section>
+
+        <section class="chapter" id="chapter-feedback">
+            <div class="chapter-marker">Capítulo Final</div>
+            <h1 class="chapter-title" data-text="O Veredito">O Veredito</h1>
+
+            <div class="feedback-container" style="display: flex; gap: 2rem; background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 15px; border: 1px solid #d4a373;">
+                <div class="team-section" style="flex: 1;">
+                    <h2 style="color: #d4a373; font-family: 'Cinzel'; margin-bottom: 1rem;">Guardiões do Projeto</h2>
+                    <ul class="team-list" style="list-style: none; color: #fff;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Arthur Lucas</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Integrante 2</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Integrante 3</li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Integrante 4</li>
+                    </ul>
+                </div>
+
+                <div class="form-wrapper" style="flex: 1;">
+                    <h2 style="color: #d4a373; font-family: 'Cinzel'; margin-bottom: 1rem;">Deixe sua marca</h2>
+                    <form id="feedbackForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="text" id="userName" required placeholder="Seu Nome" style="padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid #fff; color: #fff;">
+                        <select id="userRating" required style="padding: 10px; background: rgba(0,0,0,0.8); border: 1px solid #fff; color: #fff;">
+                            <option value="" disabled selected>Nota para a experiência</option>
+                            <option value="5">⭐⭐⭐⭐⭐ - Imersão Total</option>
+                            <option value="4">⭐⭐⭐⭐ - Muito Bom</option>
+                            <option value="3">⭐⭐⭐ - Interessante</option>
+                            <option value="2">⭐⭐ - Pode Melhorar</option>
+                            <option value="1">⭐ - Não gostei</option>
+                        </select>
+                        <textarea id="userMessage" rows="4" required placeholder="O que você sentiu?" style="padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid #fff; color: #fff;"></textarea>
+                        <button type="submit" style="padding: 10px; background: #d4a373; border: none; font-family: 'Cinzel'; cursor: pointer; font-weight: bold;">ENVIAR</button>
+                    </form>
+                    <div id="formStatus" style="margin-top: 10px; text-align: center; color: #fff;"></div>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <div class="scroll-indicator">
-        <span>Explore a Jornada</span>
-        <div class="line"></div>
-    </div>
+    <div class="scroll-indicator"><span>Explore</span><div class="line"></div></div>
 
-    <!-- Sound Toggle Button -->
-    <button id="sound-toggle" class="sound-btn">
-        <span class="sound-icon">OFF</span>
-        <span class="sound-text">SOM</span>
-    </button>
+    <button id="sound-toggle" class="sound-btn"><span class="sound-icon">OFF</span> SOM</button>
+    <audio id="bg-audio" loop><source src="assets/audio/connection.mp3" type="audio/mpeg"></audio>
 
-    <audio id="bg-audio" loop>
-        <source src="assets/audio/connection.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- Indigenous Timeline Navigation -->
     <nav class="timeline-nav">
-        <div class="timeline-line">
-            <div class="timeline-progress"></div>
-        </div>
+        <div class="timeline-line"><div class="timeline-progress"></div></div>
         <ul class="timeline-items">
-            <li class="timeline-item" data-target="#chapter-origin">
-                <div class="marker"></div>
-                <span class="tooltip">A chegada</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-connection">
-                <div class="marker"></div>
-                <span class="tooltip">O papel </span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-territory">
-                <div class="marker"></div>
-                <span class="tooltip">O processo</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-artifacts">
-                <div class="marker"></div>
-                <span class="tooltip">A Violência</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-resistance">
-                <div class="marker"></div>
-                <span class="tooltip">A educação</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-fire">
-                <div class="marker"></div>
-                <span class="tooltip">A expulsão</span>
-            </li>
-            <li class="timeline-item" data-target="#knowledge-stack">
-                <div class="marker"></div>
-                <span class="tooltip">Saberes</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-cosmology">
-                <div class="marker"></div>
-                <span class="tooltip">A visão</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-heroes">
-                <div class="marker"></div>
-                <span class="tooltip">Vozes</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-celebration">
-                <div class="marker"></div>
-                <span class="tooltip">O legado</span>
-            </li>
-            <li class="timeline-item" data-target="#chapter-future">
-                <div class="marker"></div>
-                <span class="tooltip">Historiografia</span>
-            </li>
+            <li class="timeline-item" data-target="#chapter-origin"><div class="marker"></div><span class="tooltip">Chegada</span></li>
+            <li class="timeline-item" data-target="#chapter-connection"><div class="marker"></div><span class="tooltip">Missões</span></li>
+            <li class="timeline-item" data-target="#chapter-territory"><div class="marker"></div><span class="tooltip">Aculturação</span></li>
+            <li class="timeline-item" data-target="#chapter-artifacts"><div class="marker"></div><span class="tooltip">Conflitos</span></li>
+            <li class="timeline-item" data-target="#chapter-resistance"><div class="marker"></div><span class="tooltip">Educação</span></li>
+            <li class="timeline-item" data-target="#chapter-fire"><div class="marker"></div><span class="tooltip">Expulsão</span></li>
+            <li class="timeline-item" data-target="#knowledge-stack"><div class="marker"></div><span class="tooltip">Saberes</span></li>
+            <li class="timeline-item" data-target="#chapter-cosmology"><div class="marker"></div><span class="tooltip">Visão</span></li>
+            <li class="timeline-item" data-target="#chapter-heroes"><div class="marker"></div><span class="tooltip">Vozes</span></li>
+            <li class="timeline-item" data-target="#chapter-celebration"><div class="marker"></div><span class="tooltip">Legado</span></li>
+            <li class="timeline-item" data-target="#chapter-future"><div class="marker"></div><span class="tooltip">História</span></li>
+            <li class="timeline-item" data-target="#chapter-feedback"><div class="marker"></div><span class="tooltip">Veredito</span></li>
         </ul>
     </nav>
 

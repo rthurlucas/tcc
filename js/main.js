@@ -15,7 +15,6 @@ const CONFIG = {
     rainCount: 3000, 
     cocarParticleCount: 1500,
     sparkCount: 1500,
-    danceParticleCount: 15000, 
     cometCount: 5,
     colors: {
         origin: new THREE.Color('#d4a373'),
@@ -31,8 +30,7 @@ const CONFIG = {
         clay: new THREE.Color('#8b4513'),
         storm: new THREE.Color('#1a1a2e'),
         smoke: new THREE.Color('#24110c'),
-        gold: new THREE.Color('#ffd700'),
-        spiritBlue: new THREE.Color('#a8dadc')
+        gold: new THREE.Color('#ffd700')
     },
     leafColor: new THREE.Color('#4d9e5f')
 };
@@ -113,15 +111,18 @@ const leafMaterial = new THREE.ShaderMaterial({
             vec3 pos = position; float time = uTime;
             float fallSpeed = 0.5 + aRandom.x * 1.5; pos.y -= time * fallSpeed; pos.y = mod(pos.y + 5.0, 20.0) - 5.0; 
             pos.x += sin(time * aRandom.y + aRandom.z * 10.0) * 0.5; pos.z += cos(time * aRandom.y * 0.8 + aRandom.z * 10.0) * 0.5;
-            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
-            gl_PointSize = (4.0 + aRandom.x * 4.0) * (10.0 / -mvPosition.z); vAlpha = 0.8 - smoothstep(10.0, 20.0, length(pos));
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            gl_PointSize = (4.0 + aRandom.x * 4.0) * (10.0 / -mvPosition.z);
+            vAlpha = 0.8 - smoothstep(10.0, 20.0, length(pos));
         }
     `,
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
         void main() {
             float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5); gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5);
+            gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
         }
     `,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
@@ -138,22 +139,25 @@ const fireflyMaterial = new THREE.ShaderMaterial({
     vertexShader: `
         uniform float uTime; attribute vec3 aRandom;
         void main() {
-            vec3 pos = position; vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
-            float pulse = 1.0 + 0.3 * sin(uTime * 3.0 + aRandom.x * 100.0); gl_PointSize = (8.0 + aRandom.x * 5.0) * pulse * (10.0 / -mvPosition.z);
+            vec3 pos = position; vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            float pulse = 1.0 + 0.3 * sin(uTime * 3.0 + aRandom.x * 100.0);
+            gl_PointSize = (8.0 + aRandom.x * 5.0) * pulse * (10.0 / -mvPosition.z);
         }
     `,
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity;
         void main() {
             float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard; 
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0); gl_FragColor = vec4(uColor, glow * uOpacity);
+            float glow = 1.0 - (r * 2.0); glow = pow(glow, 2.0); 
+            gl_FragColor = vec4(uColor, glow * uOpacity);
         }
     `,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
 });
 const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial); scene.add(fireflies);
 
-// --- D. Cinzas (Escuras e Irregulares) ---
+// --- D. Cinzas ---
 const ashGeometry = new THREE.BufferGeometry();
 const ashPositions = new Float32Array(CONFIG.ashCount * 3); const ashRandoms = new Float32Array(CONFIG.ashCount * 3);
 for(let i=0; i<CONFIG.ashCount; i++) { ashPositions[i*3] = (Math.random() - 0.5) * 25; ashPositions[i*3+1] = Math.random() * 15; ashPositions[i*3+2] = (Math.random() - 0.5) * 25; ashRandoms[i*3] = Math.random(); ashRandoms[i*3+1] = Math.random(); ashRandoms[i*3+2] = Math.random(); }
@@ -179,9 +183,7 @@ const ashMaterial = new THREE.ShaderMaterial({
     fragmentShader: `
         uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
         void main() {
-            vec2 uv = gl_PointCoord - 0.5; float r = length(uv);
-            float irregular = 0.5 + 0.1 * sin(atan(uv.y, uv.x) * 5.0); // Borda irregular
-            if (r > irregular) discard;
+            float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
             gl_FragColor = vec4(uColor, vAlpha * 0.8 * uOpacity);
         }
     `,
@@ -189,11 +191,10 @@ const ashMaterial = new THREE.ShaderMaterial({
 });
 const ashParticles = new THREE.Points(ashGeometry, ashMaterial); scene.add(ashParticles);
 
-// --- E. Brasas (Redondas e Vivas) ---
-const sparkGeo = new THREE.BufferGeometry();
-const sparkPos = new Float32Array(CONFIG.sparkCount * 3); 
-const sparkRandoms = new Float32Array(CONFIG.sparkCount * 3); 
-for(let i=0; i<CONFIG.sparkCount; i++) { 
+// --- E. Brasas (Sparks) ---
+const sparkTotal = CONFIG.sparkCount; const sparkGeo = new THREE.BufferGeometry();
+const sparkPos = new Float32Array(sparkTotal * 3); const sparkRandoms = new Float32Array(sparkTotal * 3); 
+for(let i=0; i<sparkTotal; i++) { 
     sparkPos[i*3] = (Math.random() - 0.5) * 20; 
     sparkPos[i*3+1] = Math.random() * 10; 
     sparkPos[i*3+2] = (Math.random() - 0.5) * 10; 
@@ -202,7 +203,11 @@ for(let i=0; i<CONFIG.sparkCount; i++) {
 sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
 sparkGeo.setAttribute('aRandom', new THREE.BufferAttribute(sparkRandoms, 3));
 const sparkMaterial = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0xff4500) }, uOpacity: { value: 0.0 } },
+    uniforms: {
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color(0xff4500) }, 
+        uOpacity: { value: 0.0 }
+    },
     vertexShader: `
         uniform float uTime; attribute vec3 aRandom; varying float vAlpha;
         void main() {
@@ -254,7 +259,7 @@ const cocarParticles = new THREE.Points(cocarGeo, cocarMaterial); cocarParticles
 
 // --- Outros Objetos ---
 const artifactGroup = new THREE.Group(); scene.add(artifactGroup); artifactGroup.visible = true; const potteryPoints = []; for (let i = 0; i < 10; i++) { potteryPoints.push(new THREE.Vector2(Math.sin(i * 0.2) * 1 + 0.5, (i - 5) * 0.5)); } const potteryGeo = new THREE.LatheGeometry(potteryPoints, 20); const potteryMaterial = new THREE.MeshBasicMaterial({ color: 0x8b4513, wireframe: true, transparent: true, opacity: 0.0 }); const pottery = new THREE.Mesh(potteryGeo, potteryMaterial); artifactGroup.add(pottery); pottery.rotation.x = Math.PI / 6;
-const rainGeo = new THREE.BufferGeometry(); const rainPos = new Float32Array(CONFIG.rainCount * 2 * 3); const rainVel = new Float32Array(CONFIG.rainCount); for(let i=0; i<CONFIG.rainCount; i++) { const x = (Math.random() - 0.5) * 40; const y = Math.random() * 30 + 10; const z = (Math.random() - 0.5) * 20; rainPos[i*6] = x; rainPos[i*6+1] = y; rainPos[i*6+2] = z; rainPos[i*6+3] = x; rainPos[i*6+4] = y - 0.5; rainPos[i*6+5] = z; rainVel[i] = 0.5 + Math.random() * 0.5; } rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3)); const rainMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.6 }); const rain = new THREE.LineSegments(rainGeo, rainMaterial); rain.visible = false; scene.add(rain);
+const rainTotal = CONFIG.rainCount; const rainGeo = new THREE.BufferGeometry(); const rainPos = new Float32Array(rainTotal * 2 * 3); const rainVel = new Float32Array(rainTotal); for(let i=0; i<rainTotal; i++) { const x = (Math.random() - 0.5) * 40; const y = Math.random() * 30 + 10; const z = (Math.random() - 0.5) * 20; rainPos[i*6] = x; rainPos[i*6+1] = y; rainPos[i*6+2] = z; rainPos[i*6+3] = x; rainPos[i*6+4] = y - 0.5; rainPos[i*6+5] = z; rainVel[i] = 0.5 + Math.random() * 0.5; } rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3)); const rainMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.6 }); const rain = new THREE.LineSegments(rainGeo, rainMaterial); rain.visible = false; scene.add(rain);
 const skyGeo = new THREE.PlaneGeometry(100, 100); const skyMaterial = new THREE.MeshBasicMaterial({ color: 0x6e7f99, transparent: true, opacity: 0.0, side: THREE.DoubleSide }); const stormSkyPlane = new THREE.Mesh(skyGeo, skyMaterial); stormSkyPlane.position.z = -20; scene.add(stormSkyPlane);
 const lightningSegmentCount = 25; const lightningGeo = new THREE.BufferGeometry(); const lightningPositions = new Float32Array((lightningSegmentCount + 1) * 3); lightningGeo.setAttribute('position', new THREE.BufferAttribute(lightningPositions, 3)); const lightningMat = new THREE.LineBasicMaterial({ color: 0xe0ffff, linewidth: 2 }); const lightningBolt = new THREE.Line(lightningGeo, lightningMat); lightningBolt.visible = false; scene.add(lightningBolt);
 function regenerateLightningPath(geo) { const posAttribute = geo.attributes.position; const array = posAttribute.array; let x = (Math.random() - 0.5) * 30; let y = 25; let z = (Math.random() - 0.5) * 15 - 5; const stepY = y / lightningSegmentCount; array[0] = x; array[1] = y; array[2] = z; for (let i = 1; i <= lightningSegmentCount; i++) { x += (Math.random() - 0.5) * 3; y -= stepY; z += (Math.random() - 0.5) * 2; array[i*3] = x; array[i*3+1] = y; array[i*3+2] = z; } posAttribute.needsUpdate = true; }
@@ -265,98 +270,6 @@ const constellationGroup = new THREE.Group(); scene.add(constellationGroup); con
 const cometCount = CONFIG.cometCount; const comets = []; const cometGeo = new THREE.PlaneGeometry(0.8, 15); const cometMat = new THREE.ShaderMaterial({ uniforms: { uColorHead: { value: new THREE.Color(0xffffff) }, uColorTail: { value: new THREE.Color(0x4b0082) }, uTime: { value: 0 } }, vertexShader: `varying vec2 vUv; void main() { vUv = uv; vec3 pos = position; mat3 rotX = mat3(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0); pos = rotX * pos; gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0); }`, fragmentShader: `uniform vec3 uColorHead; uniform vec3 uColorTail; varying vec2 vUv; void main() { float intensity = pow(vUv.y, 2.0); vec3 finalColor = mix(uColorTail, uColorHead, intensity); float alpha = smoothstep(0.0, 0.2, vUv.y) * (1.0 - abs(vUv.x - 0.5) * 2.0); gl_FragColor = vec4(finalColor, alpha); }`, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
 function resetComet(comet) { comet.position.z = -150 - Math.random() * 100; comet.position.x = (Math.random() - 0.5) * 200; comet.position.y = (Math.random() - 0.5) * 100 + 30; comet.userData.speed = 0.5 + Math.random() * 1.5; comet.rotation.z = (Math.random() - 0.5) * 0.5; comet.rotation.y = (Math.random() - 0.5) * 0.2; }
 for (let i = 0; i < cometCount; i++) { const comet = new THREE.Mesh(cometGeo, cometMat.clone()); resetComet(comet); comet.position.z = -50 - Math.random() * 200; constellationGroup.add(comet); comets.push(comet); }
-
-// --- DANÇA DA VIDA (Personalizada: Indígena e Sincronizada) ---
-const danceParticleCount = CONFIG.danceParticleCount; 
-const danceGeo = new THREE.BufferGeometry();
-const dancePos = new Float32Array(danceParticleCount * 3);
-const danceAttr = new Float32Array(danceParticleCount * 3); // [DancerID, BodyPartID, Randomness]
-const dancer1Center = new THREE.Vector3(-1.5, -0.5, -3); 
-const dancer2Center = new THREE.Vector3(1.5, -0.5, -3);  
-
-for (let i = 0; i < danceParticleCount; i++) {
-    const dancerId = i < danceParticleCount / 2 ? 0 : 1;
-    const center = dancerId === 0 ? dancer1Center : dancer2Center;
-    
-    const shapeRnd = Math.random();
-    let bodyPartId = 0;
-    let pX = 0, pY = 0, pZ = 0;
-
-    if (shapeRnd < 0.25) { 
-        bodyPartId = 4.0; // CABELO
-        const theta = Math.random() * Math.PI * 2; const phi = Math.acos(2 * Math.random() - 1); const rad = 0.4 + Math.random() * 0.5; 
-        pX = rad * Math.sin(phi) * Math.cos(theta) * 1.2; pY = rad * Math.sin(phi) * Math.sin(theta) * 0.8 + 1.6; pZ = rad * Math.cos(phi) * 0.5 - 0.2;
-    } else if (shapeRnd < 0.55) {
-        bodyPartId = 3.0; // SAIA
-        const heightT = Math.random(); const angle = Math.random() * Math.PI * 2; const baseRadius = 0.8; const topRadius = 0.35;
-        const currentRadius = baseRadius * (1.0 - heightT) + topRadius * heightT;
-        pX = Math.cos(angle) * currentRadius * Math.random(); pY = heightT * 1.0 - 0.1; pZ = Math.sin(angle) * currentRadius * Math.random();
-    } else if (shapeRnd < 0.75) {
-        bodyPartId = 0.0; // TORSO
-        const angle = Math.random() * Math.PI * 2; const rad = 0.25 + Math.random() * 0.05;
-        pX = Math.cos(angle) * rad; pY = 1.0 + Math.random() * 0.4; pZ = Math.sin(angle) * rad * 0.5;
-    } else if (shapeRnd < 0.85) {
-        bodyPartId = 1.0; // CABEÇA
-        const angle = Math.random() * Math.PI * 2; const rad = 0.2 * Math.random();
-        pX = Math.cos(angle) * rad; pY = 1.65 + Math.random() * 0.25; pZ = Math.sin(angle) * rad;
-    } else {
-        bodyPartId = 2.0; // BRAÇOS
-        const t = Math.random(); 
-        if (Math.random() > 0.5 || dancerId === 1) { 
-            pX = 0.25 + t * 0.25 + (Math.random()-0.5)*0.1; pY = 1.35 + t * 0.25 + (Math.random()-0.5)*0.1; pZ = t * 0.4 + (Math.random()-0.5)*0.1;
-        } else {
-            pX = -0.25 - t * 0.1 + (Math.random()-0.5)*0.1; pY = 1.35 - t * 0.55 + (Math.random()-0.5)*0.1; pZ = t * 0.1 + (Math.random()-0.5)*0.1;
-        }
-    }
-    dancePos[i*3] = center.x + pX; dancePos[i*3+1] = center.y + pY; dancePos[i*3+2] = center.z + pZ;
-    danceAttr[i*3] = dancerId; danceAttr[i*3+1] = bodyPartId; danceAttr[i*3+2] = Math.random(); 
-}
-danceGeo.setAttribute('position', new THREE.BufferAttribute(dancePos, 3));
-danceGeo.setAttribute('danceAttr', new THREE.BufferAttribute(danceAttr, 3));
-
-const danceMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        uTime: { value: 0 },
-        uColor1: { value: CONFIG.colors.gold },      
-        uColor2: { value: CONFIG.colors.spiritBlue },
-        uOpacity: { value: 0.0 } 
-    },
-    vertexShader: `
-        uniform float uTime; attribute vec3 danceAttr; varying float vAlpha; varying float vDancerId; varying float vBodyPart;
-        float hash(float n) { return fract(sin(n) * 43758.5453123); }
-        float noise(vec3 x) { vec3 p = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f); float n = p.x + p.y * 57.0 + 113.0 * p.z; return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x), mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y), mix(mix(hash(n + 113.0), hash(n + 114.0), f.x), mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z); }
-        void main() {
-            vec3 pos = position; float dancerId = danceAttr.x; float bodyPartId = danceAttr.y; float rnd = danceAttr.z; float t = uTime * 0.8;
-            vec3 danceOffset = vec3(0.0);
-            if (bodyPartId == 4.0) { danceOffset.x = sin(t*1.5 + pos.y + rnd)*0.15; danceOffset.z = cos(t*1.2 + pos.x)*0.1; danceOffset.y = sin(t*2.0 + rnd)*0.05; }
-            else if (bodyPartId == 3.0) { float angle = t + rnd * 6.28; float radiusDist = length(pos.xz - vec2(0.0)); danceOffset.x = cos(angle) * radiusDist * 0.1; danceOffset.z = sin(angle) * radiusDist * 0.1; danceOffset.y = sin(t*1.5 + pos.x)*0.05; }
-            else if (bodyPartId == 2.0) { float intensity = (pos.y > 1.4) ? 0.15 : 0.05; danceOffset.x = sin(t + rnd)*intensity; danceOffset.y = cos(t*1.3 + rnd)*intensity; }
-            else { danceOffset.x = sin(t*0.5 + rnd)*0.03; danceOffset.y = cos(t*0.7)*0.02; }
-            vec3 noisePos = pos * 1.5 + vec3(0.0, t * 0.5, 0.0);
-            vec3 noiseOffset = vec3(noise(noisePos), noise(noisePos + vec3(10.0)), noise(noisePos + vec3(20.0)));
-            pos += danceOffset + noiseOffset * 0.1;
-            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_Position = projectionMatrix * mvPosition;
-            float sizeBase = (bodyPartId == 4.0) ? 2.5 : (bodyPartId == 1.0 ? 1.2 : 1.8); 
-            gl_PointSize = (sizeBase + rnd * 2.0) * (15.0 / -mvPosition.z);
-            vAlpha = 0.7 + 0.3 * rnd; if(bodyPartId == 4.0 && rnd < 0.3) vAlpha *= 0.5;
-            vDancerId = dancerId; vBodyPart = bodyPartId;
-        }
-    `,
-    fragmentShader: `
-        uniform vec3 uColor1; uniform vec3 uColor2; uniform float uOpacity; varying float vAlpha; varying float vDancerId; varying float vBodyPart;
-        void main() {
-            float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-            float glow = 1.0 - (r * 2.0); glow = pow(glow, 1.5);
-            vec3 baseColor = mix(uColor1, uColor2, step(0.5, vDancerId));
-            if(vBodyPart == 4.0) baseColor *= 0.85; if(vBodyPart == 2.0 && vAlpha > 0.8) baseColor += vec3(0.2);
-            gl_FragColor = vec4(baseColor, vAlpha * glow * uOpacity);
-        }
-    `,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-});
-const danceSystem = new THREE.Points(danceGeo, danceMaterial);
-danceSystem.position.set(0, -1.0, 0); // Ajuste de altura
-scene.add(danceSystem);
 
 const cursorDot = document.querySelector('.cursor-dot'); const cursorOutline = document.querySelector('.cursor-outline'); window.addEventListener('mousemove', (e) => { const posX = e.clientX; const posY = e.clientY; if(cursorDot) { cursorDot.style.left = `${posX}px`; cursorDot.style.top = `${posY}px`; } if(cursorOutline) cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" }); mouseX = e.clientX / window.innerWidth - 0.5; mouseY = e.clientY / window.innerHeight - 0.5; gsap.to(particles.rotation, { x: mouseY * 0.2, y: mouseX * 0.2 + (clock.getElapsedTime() * 0.05), duration: 1 }); });
 
@@ -375,11 +288,8 @@ function animate() {
     if (sparkMaterial.uniforms) sparkMaterial.uniforms.uTime.value = elapsedTime;
     if (cocarMaterial.uniforms) cocarMaterial.uniforms.uTime.value = elapsedTime;
     if (cometMat.uniforms) cometMat.uniforms.uTime.value = elapsedTime;
-    if (danceMaterial.uniforms) danceMaterial.uniforms.uTime.value = elapsedTime;
 
-    const globalRot = elapsedTime * 0.05;
-    if (particles) particles.rotation.y = globalRot;
-    if (danceSystem) danceSystem.rotation.y = globalRot; // Sincronizado!
+    if (particles) particles.rotation.y = elapsedTime * 0.05;
     if (leafParticles) leafParticles.rotation.y = elapsedTime * 0.02;
 
     if (fireflies) {
@@ -394,7 +304,7 @@ function animate() {
 
     if (isStormActive) {
         const rPos = rain.geometry.attributes.position.array;
-        for(let i=0; i<CONFIG.rainCount; i++) {
+        for(let i=0; i<rainTotal; i++) {
             const speed = rainVel[i]; rPos[i*6+1] -= speed; rPos[i*6+4] -= speed;
             if(rPos[i*6+1] < -10) {
                 const newY = 20 + Math.random() * 5; const newX = (Math.random() - 0.5) * 40; const newZ = (Math.random() - 0.5) * 20;
@@ -409,6 +319,7 @@ function animate() {
 
     if (typeof forestGroup !== 'undefined' && forestGroup.visible) forestMaterial.uniforms.uScanHeight.value = Math.sin(elapsedTime) * 2 + 1;
     
+    // Animação da Constelação e Cometas
     if (typeof constellationGroup !== 'undefined' && constellationGroup.visible) { 
         constellationGroup.rotation.z = Math.sin(elapsedTime * 0.1) * 0.05; 
         if (typeof comets !== 'undefined') {
@@ -503,31 +414,9 @@ ScrollTrigger.create({
 tl.to(material.uniforms.uColor.value, { r: 0.0, g: 0.0, b: 0.2, duration: 1, ease: smoothEase }, "step_cosmology").to(material.uniforms.uFormFactor, { value: 0.0, duration: 1, ease: smoothEase }, "step_cosmology").to(camera.position, { z: 2, y: 5, duration: 1, ease: smoothEase }, "step_cosmology").to(camera.rotation, { x: 0.5, duration: 1, ease: smoothEase }, "step_cosmology");
 ScrollTrigger.create({ trigger: "#chapter-cosmology", start: "top center", end: "bottom center", onEnter: () => { if(constellationGroup) constellationGroup.visible = true; gsap.to(scene.fog, { density: 0.0, duration: 1 }); }, onLeave: () => { if(constellationGroup) constellationGroup.visible = false; gsap.to(scene.fog, { density: 0.02, duration: 1 }); }, onEnterBack: () => { if(constellationGroup) constellationGroup.visible = true; gsap.to(scene.fog, { density: 0.0, duration: 1 }); }, onLeaveBack: () => { if(constellationGroup) constellationGroup.visible = false; gsap.to(scene.fog, { density: 0.02, duration: 1 }); } });
 tl.to(camera.rotation, { x: 0, duration: 1, ease: smoothEase }, "step_reset_cam"); tl.to(material.uniforms.uColor.value, { r: 0.2, g: 0.1, b: 0.05, duration: 1, ease: smoothEase }, "step_heroes").to(material.uniforms.uFormFactor, { value: 1.0, duration: 1, ease: smoothEase }, "step_heroes").to(camera.position, { z: 4, y: 1, duration: 1, ease: smoothEase }, "step_heroes"); 
-
-// --- CELEBRAÇÃO (Dança da Vida) ---
-tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.celebration.r, g: CONFIG.colors.celebration.g, b: CONFIG.colors.celebration.b, duration: 1, ease: smoothEase }, "step4")
-.to(material.uniforms.uFormFactor, { value: 1.5, duration: 1, ease: smoothEase }, "step4")
-.to(camera.position, { z: 5, y: 2, duration: 1, ease: smoothEase }, "step4");
-
-ScrollTrigger.create({
-    trigger: "#chapter-celebration",
-    start: "top center",
-    end: "bottom center",
-    onEnter: () => {
-        gsap.to(danceMaterial.uniforms.uOpacity, { value: 1.0, duration: 1.5 });
-    },
-    onLeave: () => {
-        gsap.to(danceMaterial.uniforms.uOpacity, { value: 0.0, duration: 1.0 });
-    },
-    onEnterBack: () => {
-        gsap.to(danceMaterial.uniforms.uOpacity, { value: 1.0, duration: 1.5 });
-    },
-    onLeaveBack: () => {
-        gsap.to(danceMaterial.uniforms.uOpacity, { value: 0.0, duration: 1.0 });
-    }
-});
-
+tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.celebration.r, g: CONFIG.colors.celebration.g, b: CONFIG.colors.celebration.b, duration: 1, ease: smoothEase }, "step4").to(material.uniforms.uFormFactor, { value: 1.5, duration: 1, ease: smoothEase }, "step4").to(camera.position, { z: 5, y: 2, duration: 1, ease: smoothEase }, "step4");
 tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.future.r, g: CONFIG.colors.future.g, b: CONFIG.colors.future.b, duration: 1, ease: smoothEase }, "step5").to(material.uniforms.uFormFactor, { value: 0.5, duration: 1, ease: smoothEase }, "step5").to(camera.position, { z: 6, y: 3, duration: 1, ease: smoothEase }, "step5");
+tl.to(material.uniforms.uColor.value, { r: 1.0, g: 1.0, b: 1.0, duration: 1, ease: "sine.inOut" }, "step_feedback").to(material.uniforms.uFormFactor, { value: 0.0, duration: 1, ease: "sine.inOut" }, "step_feedback").to(camera.position, { z: 4, y: 1, duration: 1, ease: "sine.inOut" }, "step_feedback");
 
 // UI - SLIDER E MODAL
 const modalOverlay = document.querySelector('.modal-overlay'); const closeBtn = document.querySelector('.close-modal'); const knowledgeCards = document.querySelectorAll('.knowledge-card'); const slides = document.querySelectorAll('.custom-slide'); const prevBtn = document.querySelector('.prev-btn'); const nextBtn = document.querySelector('.next-btn'); const dotsContainer = document.querySelector('.slider-dots'); let currentSlideIndex = 0;
@@ -535,46 +424,8 @@ slides.forEach((_, index) => { const dot = document.createElement('div'); dot.cl
 function updateDots(index) { dots.forEach(dot => dot.classList.remove('active')); dots[index].classList.add('active'); }
 function goToSlide(index) { if (index < 0) index = slides.length - 1; if (index >= slides.length) index = 0; const currentSlide = slides[currentSlideIndex]; const nextSlide = slides[index]; const direction = index > currentSlideIndex ? 1 : -1; gsap.to(currentSlide, { autoAlpha: 0, x: -100 * direction, duration: 0.5, ease: "power2.inOut", onComplete: () => { currentSlide.classList.remove('active'); gsap.set(currentSlide, { x: 0 }); } }); nextSlide.classList.add('active'); gsap.fromTo(nextSlide, { autoAlpha: 0, x: 100 * direction }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "power2.inOut" }); const content = nextSlide.querySelector('.slide-content'); gsap.fromTo(content, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" }); currentSlideIndex = index; updateDots(index); }
 prevBtn.addEventListener('click', () => goToSlide(currentSlideIndex - 1)); nextBtn.addEventListener('click', () => goToSlide(currentSlideIndex + 1));
-knowledgeCards.forEach((card, index) => { 
-    card.addEventListener('click', () => { 
-        currentSlideIndex = index; 
-        gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 });
-        slides.forEach(s => { s.classList.remove('active'); gsap.set(s, { autoAlpha: 0 }); }); 
-        const targetSlide = slides[currentSlideIndex]; 
-        targetSlide.classList.add('active'); 
-        gsap.set(targetSlide, { autoAlpha: 1 }); 
-        updateDots(currentSlideIndex); 
-        document.body.style.overflow = 'hidden'; 
-        gsap.to(modalOverlay, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }); 
-        const content = targetSlide.querySelector('.slide-content'); 
-        gsap.fromTo(content, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" }); 
-    }); 
-});
-function closeModal() { 
-    gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 0.5 });
-    gsap.to(modalOverlay, { autoAlpha: 0, duration: 0.4, ease: "power2.in", onComplete: () => { document.body.style.overflow = ''; } }); 
-} 
-closeBtn.addEventListener('click', closeModal); document.addEventListener('keydown', (e) => { if (modalOverlay.style.visibility !== 'hidden') { if (e.key === 'Escape') closeModal(); if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1); if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1); } });
+knowledgeCards.forEach((card, index) => { card.addEventListener('click', () => { currentSlideIndex = index; gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 }); slides.forEach(s => { s.classList.remove('active'); gsap.set(s, { autoAlpha: 0 }); }); const targetSlide = slides[currentSlideIndex]; targetSlide.classList.add('active'); gsap.set(targetSlide, { autoAlpha: 1 }); updateDots(currentSlideIndex); document.body.style.overflow = 'hidden'; gsap.to(modalOverlay, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }); const content = targetSlide.querySelector('.slide-content'); gsap.fromTo(content, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" }); }); });
+function closeModal() { gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 0.5 }); gsap.to(modalOverlay, { autoAlpha: 0, duration: 0.4, ease: "power2.in", onComplete: () => { document.body.style.overflow = ''; } }); } closeBtn.addEventListener('click', closeModal); document.addEventListener('keydown', (e) => { if (modalOverlay.style.visibility !== 'hidden') { if (e.key === 'Escape') closeModal(); if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1); if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1); } });
 const bgAudio = document.getElementById('bg-audio'); bgAudio.volume = 0; let isMuted = true; const soundBtn = document.getElementById('sound-toggle'); const soundIcon = soundBtn.querySelector('.sound-icon'); function toggleSound() { isMuted = !isMuted; if (isMuted) { soundIcon.textContent = "OFF"; soundBtn.classList.remove('playing'); gsap.to(bgAudio, { volume: 0, duration: 1, onComplete: () => bgAudio.pause() }); } else { soundIcon.textContent = "ON"; soundBtn.classList.add('playing'); bgAudio.play().then(() => { gsap.to(bgAudio, { volume: 0.5, duration: 1 }); }).catch(e => console.error("Audio play failed:", e)); } } soundBtn.addEventListener('click', toggleSound); const timelineItems = document.querySelectorAll('.timeline-item'); const timelineProgress = document.querySelector('.timeline-progress'); chapters.forEach((id, index) => { const section = document.querySelector(id); if (section) { ScrollTrigger.create({ trigger: section, start: "top center", end: "bottom center", onEnter: () => updateTimeline(index), onEnterBack: () => updateTimeline(index) }); } }); function updateTimeline(index) { timelineItems.forEach((item, i) => { if (i === index) item.classList.add('active'); else item.classList.remove('active'); }); const progress = (index / (chapters.length - 1)) * 100; gsap.to(timelineProgress, { height: `${progress}%`, duration: 0.5, ease: "power2.out" }); } timelineItems.forEach((item) => { item.addEventListener('click', (e) => { const targetId = item.getAttribute('data-target'); const targetSection = document.querySelector(targetId); if (targetSection) { gsap.to(window, { duration: 1.5, scrollTo: { y: targetSection, autoKill: false }, ease: "power3.inOut" }); } }); }); const heroCards = document.querySelectorAll('.hero-card'); heroCards.forEach(card => { card.addEventListener('click', () => { heroCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); }); card.addEventListener('mouseenter', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(0%) brightness(0.9)", duration: 0.3 }); } }); card.addEventListener('mouseleave', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(100%) brightness(0.7)", duration: 0.3 }); } }); });
-
-window.addEventListener('load', () => {
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        window.scrollTo(0, 0);
-        const hidePreloader = () => {
-            gsap.to(preloader, {
-                opacity: 0,
-                duration: 1,
-                onComplete: () => {
-                    preloader.style.visibility = 'hidden';
-                    ScrollTrigger.refresh();
-                }
-            });
-        };
-        
-        setTimeout(hidePreloader, 500);
-        setTimeout(() => {
-            if(preloader.style.visibility !== 'hidden') hidePreloader();
-        }, 4000);
-    }
-});
+const feedbackForm = document.getElementById('feedbackForm'); const formStatus = document.getElementById('formStatus'); if(feedbackForm) { feedbackForm.addEventListener('submit', async (e) => { e.preventDefault(); const name = document.getElementById('userName').value; const rating = document.getElementById('userRating').value; const message = document.getElementById('userMessage').value; formStatus.textContent = "Enviando aos espíritos..."; formStatus.style.color = "#d4a373"; try { const response = await fetch('http://localhost:8080/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, rating, message }) }); if (response.ok) { formStatus.textContent = "Gratidão! Sua voz foi ouvida."; formStatus.style.color = "#4d9e5f"; feedbackForm.reset(); } else { throw new Error('Erro no servidor'); } } catch (error) { console.error(error); formStatus.textContent = "Mensagem salva (Simulação Local)."; formStatus.style.color = "#a8dadc"; setTimeout(() => formStatus.textContent = "", 3000); } }); }
+window.addEventListener('load', () => { const preloader = document.getElementById('preloader'); if (preloader) { window.scrollTo(0, 0); const hidePreloader = () => { gsap.to(preloader, { opacity: 0, duration: 1, onComplete: () => { preloader.style.visibility = 'hidden'; ScrollTrigger.refresh(); } }); }; setTimeout(hidePreloader, 500); setTimeout(() => { if(preloader.style.visibility !== 'hidden') hidePreloader(); }, 4000); } });
