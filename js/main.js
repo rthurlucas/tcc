@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import ScrollToPlugin from 'gsap/ScrollToPlugin'; // Importante para o scroll suave
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // =========================================================================
 // --- 1. CONFIGURAÇÃO GERAL ---
@@ -12,19 +13,19 @@ const CONFIG = {
     particleCount: 6000,
     leafCount: 3000,
     ashCount: 3000,
-    rainCount: 3000, 
+    rainCount: 3000,
     cocarParticleCount: 1500,
     sparkCount: 1500,
     cometCount: 5,
     colors: {
         origin: new THREE.Color('#d4a373'),
         connection: new THREE.Color('#2a9d8f'),
-        territory: new THREE.Color('#588157'), 
-        night: new THREE.Color('#051014'),     
+        territory: new THREE.Color('#588157'),
+        night: new THREE.Color('#051014'),
         resistance: new THREE.Color('#e76f51'),
         fire: new THREE.Color('#ff4500'),
-        burnt: new THREE.Color('#0a0200'), 
-        ember: new THREE.Color('#ff3300'), 
+        burnt: new THREE.Color('#0a0200'),
+        ember: new THREE.Color('#ff3300'),
         celebration: new THREE.Color('#f4a261'),
         future: new THREE.Color('#a8dadc'),
         clay: new THREE.Color('#8b4513'),
@@ -36,8 +37,8 @@ const CONFIG = {
 };
 
 const chapters = [
-    '#chapter-origin', '#chapter-connection', '#chapter-territory', '#chapter-artifacts', 
-    '#chapter-resistance', '#chapter-fire', '#knowledge-stack', '#chapter-cosmology', 
+    '#chapter-origin', '#chapter-connection', '#chapter-territory', '#chapter-artifacts',
+    '#chapter-resistance', '#chapter-fire', '#knowledge-stack', '#chapter-cosmology',
     '#chapter-heroes', '#chapter-celebration', '#chapter-future'
 ];
 
@@ -418,14 +419,242 @@ tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.celebration.r, g: CONFI
 tl.to(material.uniforms.uColor.value, { r: CONFIG.colors.future.r, g: CONFIG.colors.future.g, b: CONFIG.colors.future.b, duration: 1, ease: smoothEase }, "step5").to(material.uniforms.uFormFactor, { value: 0.5, duration: 1, ease: smoothEase }, "step5").to(camera.position, { z: 6, y: 3, duration: 1, ease: smoothEase }, "step5");
 tl.to(material.uniforms.uColor.value, { r: 1.0, g: 1.0, b: 1.0, duration: 1, ease: "sine.inOut" }, "step_feedback").to(material.uniforms.uFormFactor, { value: 0.0, duration: 1, ease: "sine.inOut" }, "step_feedback").to(camera.position, { z: 4, y: 1, duration: 1, ease: "sine.inOut" }, "step_feedback");
 
-// UI - SLIDER E MODAL
-const modalOverlay = document.querySelector('.modal-overlay'); const closeBtn = document.querySelector('.close-modal'); const knowledgeCards = document.querySelectorAll('.knowledge-card'); const slides = document.querySelectorAll('.custom-slide'); const prevBtn = document.querySelector('.prev-btn'); const nextBtn = document.querySelector('.next-btn'); const dotsContainer = document.querySelector('.slider-dots'); let currentSlideIndex = 0;
-slides.forEach((_, index) => { const dot = document.createElement('div'); dot.classList.add('dot'); if (index === 0) dot.classList.add('active'); dot.addEventListener('click', () => goToSlide(index)); dotsContainer.appendChild(dot); }); const dots = document.querySelectorAll('.dot');
-function updateDots(index) { dots.forEach(dot => dot.classList.remove('active')); dots[index].classList.add('active'); }
-function goToSlide(index) { if (index < 0) index = slides.length - 1; if (index >= slides.length) index = 0; const currentSlide = slides[currentSlideIndex]; const nextSlide = slides[index]; const direction = index > currentSlideIndex ? 1 : -1; gsap.to(currentSlide, { autoAlpha: 0, x: -100 * direction, duration: 0.5, ease: "power2.inOut", onComplete: () => { currentSlide.classList.remove('active'); gsap.set(currentSlide, { x: 0 }); } }); nextSlide.classList.add('active'); gsap.fromTo(nextSlide, { autoAlpha: 0, x: 100 * direction }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "power2.inOut" }); const content = nextSlide.querySelector('.slide-content'); gsap.fromTo(content, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" }); currentSlideIndex = index; updateDots(index); }
-prevBtn.addEventListener('click', () => goToSlide(currentSlideIndex - 1)); nextBtn.addEventListener('click', () => goToSlide(currentSlideIndex + 1));
-knowledgeCards.forEach((card, index) => { card.addEventListener('click', () => { currentSlideIndex = index; gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 }); slides.forEach(s => { s.classList.remove('active'); gsap.set(s, { autoAlpha: 0 }); }); const targetSlide = slides[currentSlideIndex]; targetSlide.classList.add('active'); gsap.set(targetSlide, { autoAlpha: 1 }); updateDots(currentSlideIndex); document.body.style.overflow = 'hidden'; gsap.to(modalOverlay, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }); const content = targetSlide.querySelector('.slide-content'); gsap.fromTo(content, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" }); }); });
-function closeModal() { gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 0.5 }); gsap.to(modalOverlay, { autoAlpha: 0, duration: 0.4, ease: "power2.in", onComplete: () => { document.body.style.overflow = ''; } }); } closeBtn.addEventListener('click', closeModal); document.addEventListener('keydown', (e) => { if (modalOverlay.style.visibility !== 'hidden') { if (e.key === 'Escape') closeModal(); if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1); if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1); } });
-const bgAudio = document.getElementById('bg-audio'); bgAudio.volume = 0; let isMuted = true; const soundBtn = document.getElementById('sound-toggle'); const soundIcon = soundBtn.querySelector('.sound-icon'); function toggleSound() { isMuted = !isMuted; if (isMuted) { soundIcon.textContent = "OFF"; soundBtn.classList.remove('playing'); gsap.to(bgAudio, { volume: 0, duration: 1, onComplete: () => bgAudio.pause() }); } else { soundIcon.textContent = "ON"; soundBtn.classList.add('playing'); bgAudio.play().then(() => { gsap.to(bgAudio, { volume: 0.5, duration: 1 }); }).catch(e => console.error("Audio play failed:", e)); } } soundBtn.addEventListener('click', toggleSound); const timelineItems = document.querySelectorAll('.timeline-item'); const timelineProgress = document.querySelector('.timeline-progress'); chapters.forEach((id, index) => { const section = document.querySelector(id); if (section) { ScrollTrigger.create({ trigger: section, start: "top center", end: "bottom center", onEnter: () => updateTimeline(index), onEnterBack: () => updateTimeline(index) }); } }); function updateTimeline(index) { timelineItems.forEach((item, i) => { if (i === index) item.classList.add('active'); else item.classList.remove('active'); }); const progress = (index / (chapters.length - 1)) * 100; gsap.to(timelineProgress, { height: `${progress}%`, duration: 0.5, ease: "power2.out" }); } timelineItems.forEach((item) => { item.addEventListener('click', (e) => { const targetId = item.getAttribute('data-target'); const targetSection = document.querySelector(targetId); if (targetSection) { gsap.to(window, { duration: 1.5, scrollTo: { y: targetSection, autoKill: false }, ease: "power3.inOut" }); } }); }); const heroCards = document.querySelectorAll('.hero-card'); heroCards.forEach(card => { card.addEventListener('click', () => { heroCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); }); card.addEventListener('mouseenter', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(0%) brightness(0.9)", duration: 0.3 }); } }); card.addEventListener('mouseleave', () => { if (!card.classList.contains('active') && window.innerWidth > 768) { gsap.to(card, { filter: "grayscale(100%) brightness(0.7)", duration: 0.3 }); } }); });
-const feedbackForm = document.getElementById('feedbackForm'); const formStatus = document.getElementById('formStatus'); if(feedbackForm) { feedbackForm.addEventListener('submit', async (e) => { e.preventDefault(); const name = document.getElementById('userName').value; const rating = document.getElementById('userRating').value; const message = document.getElementById('userMessage').value; formStatus.textContent = "Enviando aos espíritos..."; formStatus.style.color = "#d4a373"; try { const response = await fetch('http://localhost:8080/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, rating, message }) }); if (response.ok) { formStatus.textContent = "Gratidão! Sua voz foi ouvida."; formStatus.style.color = "#4d9e5f"; feedbackForm.reset(); } else { throw new Error('Erro no servidor'); } } catch (error) { console.error(error); formStatus.textContent = "Mensagem salva (Simulação Local)."; formStatus.style.color = "#a8dadc"; setTimeout(() => formStatus.textContent = "", 3000); } }); }
-window.addEventListener('load', () => { const preloader = document.getElementById('preloader'); if (preloader) { window.scrollTo(0, 0); const hidePreloader = () => { gsap.to(preloader, { opacity: 0, duration: 1, onComplete: () => { preloader.style.visibility = 'hidden'; ScrollTrigger.refresh(); } }); }; setTimeout(hidePreloader, 500); setTimeout(() => { if(preloader.style.visibility !== 'hidden') hidePreloader(); }, 4000); } });
+// =========================================================================
+// --- 7. UI E INTERATIVIDADE ---
+// =========================================================================
+
+// Slider e Modal
+const modalOverlay = document.querySelector('.modal-overlay');
+const closeBtn = document.querySelector('.close-modal');
+const knowledgeCards = document.querySelectorAll('.knowledge-card');
+const slides = document.querySelectorAll('.custom-slide');
+const prevBtn = document.querySelector('.prev-btn');
+const nextBtn = document.querySelector('.next-btn');
+const dotsContainer = document.querySelector('.slider-dots');
+let currentSlideIndex = 0;
+
+// Criação dos dots (bolinhas)
+if (dotsContainer && slides.length > 0) {
+    slides.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(index));
+        dotsContainer.appendChild(dot);
+    });
+}
+const dots = document.querySelectorAll('.dot');
+
+function updateDots(index) { 
+    if(dots.length > 0) {
+        dots.forEach(dot => dot.classList.remove('active')); 
+        if(dots[index]) dots[index].classList.add('active'); 
+    }
+}
+
+function goToSlide(index) {
+    if (slides.length === 0) return;
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    
+    const currentSlide = slides[currentSlideIndex];
+    const nextSlide = slides[index];
+    const direction = index > currentSlideIndex ? 1 : -1;
+
+    gsap.to(currentSlide, {
+        autoAlpha: 0, x: -100 * direction, duration: 0.5, ease: "power2.inOut",
+        onComplete: () => { currentSlide.classList.remove('active'); gsap.set(currentSlide, { x: 0 }); }
+    });
+
+    nextSlide.classList.add('active');
+    gsap.fromTo(nextSlide, { autoAlpha: 0, x: 100 * direction }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "power2.inOut" });
+
+    const content = nextSlide.querySelector('.slide-content');
+    if(content) {
+        gsap.fromTo(content, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" });
+    }
+
+    currentSlideIndex = index;
+    updateDots(index);
+}
+
+if(prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentSlideIndex - 1));
+if(nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+
+knowledgeCards.forEach((card, index) => {
+    card.addEventListener('click', () => {
+        currentSlideIndex = index;
+        // Efeito visual ao abrir
+        if(typeof cocarMaterial !== 'undefined') gsap.to(cocarMaterial.uniforms.uOpacity, { value: 0.0, duration: 0.5 });
+        
+        slides.forEach(s => { s.classList.remove('active'); gsap.set(s, { autoAlpha: 0 }); });
+        const targetSlide = slides[currentSlideIndex];
+        if(targetSlide) {
+            targetSlide.classList.add('active');
+            gsap.set(targetSlide, { autoAlpha: 1 });
+            updateDots(currentSlideIndex);
+            
+            document.body.style.overflow = 'hidden';
+            gsap.to(modalOverlay, { autoAlpha: 1, duration: 0.5, ease: "power2.out" });
+            
+            const content = targetSlide.querySelector('.slide-content');
+            if(content) gsap.fromTo(content, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: "back.out(1.7)" });
+        }
+    });
+});
+
+function closeModal() {
+    if(typeof cocarMaterial !== 'undefined') gsap.to(cocarMaterial.uniforms.uOpacity, { value: 1.0, duration: 0.5 });
+    gsap.to(modalOverlay, {
+        autoAlpha: 0, duration: 0.4, ease: "power2.in",
+        onComplete: () => { document.body.style.overflow = ''; }
+    });
+}
+
+if(closeBtn) closeBtn.addEventListener('click', closeModal);
+
+document.addEventListener('keydown', (e) => {
+    if (modalOverlay && modalOverlay.style.visibility !== 'hidden') {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1);
+        if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1);
+    }
+});
+
+// Navegação Lateral (Timeline) e Scroll Suave
+const timelineItems = document.querySelectorAll('.timeline-item');
+const timelineProgress = document.querySelector('.timeline-progress');
+
+if (typeof chapters !== 'undefined') {
+    chapters.forEach((id, index) => {
+        const section = document.querySelector(id);
+        if (section) {
+            ScrollTrigger.create({
+                trigger: section, start: "top center", end: "bottom center",
+                onEnter: () => updateTimeline(index),
+                onEnterBack: () => updateTimeline(index)
+            });
+        }
+    });
+}
+
+function updateTimeline(index) {
+    timelineItems.forEach((item, i) => {
+        if (i === index) item.classList.add('active');
+        else item.classList.remove('active');
+    });
+    if(typeof chapters !== 'undefined') {
+        const progress = (index / (chapters.length - 1)) * 100;
+        if(timelineProgress) gsap.to(timelineProgress, { height: `${progress}%`, duration: 0.5, ease: "power2.out" });
+    }
+}
+
+timelineItems.forEach((item) => {
+    item.addEventListener('click', (e) => {
+        const targetId = item.getAttribute('data-target');
+        if (targetId) {
+            gsap.to(window, { duration: 1.5, scrollTo: { y: targetId, autoKill: false }, ease: "power3.inOut" });
+        }
+    });
+});
+
+// Cards dos Heróis
+const heroCards = document.querySelectorAll('.hero-card');
+heroCards.forEach(card => {
+    card.addEventListener('click', () => {
+        heroCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+    });
+    card.addEventListener('mouseenter', () => {
+        if (!card.classList.contains('active') && window.innerWidth > 768) {
+            gsap.to(card, { filter: "grayscale(0%) brightness(0.9)", duration: 0.3 });
+        }
+    });
+    card.addEventListener('mouseleave', () => {
+        if (!card.classList.contains('active') && window.innerWidth > 768) {
+            gsap.to(card, { filter: "grayscale(100%) brightness(0.7)", duration: 0.3 });
+        }
+    });
+});
+
+// Formulário de Feedback
+const feedbackForm = document.getElementById('feedbackForm');
+const formStatus = document.getElementById('formStatus');
+
+if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(formStatus) {
+            formStatus.textContent = "Enviando aos espíritos...";
+            formStatus.style.color = "#d4a373";
+        }
+        
+        // Simulação
+        setTimeout(() => {
+            if(formStatus) {
+                formStatus.textContent = "Gratidão! Sua voz foi ouvida.";
+                formStatus.style.color = "#4d9e5f";
+            }
+            feedbackForm.reset();
+        }, 1500);
+    });
+}
+
+
+// ==========================================
+// --- CONTROLE DE ÁUDIO (SUPER SIMPLES) ---
+// ==========================================
+const bgAudio = document.getElementById('bg-audio');
+const soundBtn = document.getElementById('sound-toggle');
+
+if (bgAudio && soundBtn) {
+    bgAudio.volume = 0.5;
+
+    soundBtn.addEventListener('click', () => {
+        if (bgAudio.paused) {
+            // TENTAR TOCAR
+            bgAudio.play().then(() => {
+                // Se der certo:
+                soundBtn.innerHTML = '<span class="sound-icon">ON</span> SOM';
+                soundBtn.classList.add('playing');
+                soundBtn.style.borderColor = "#4d9e5f"; // Força borda verde
+            }).catch((err) => {
+                console.error("Erro no áudio:", err);
+            });
+        } else {
+            // PAUSAR
+            bgAudio.pause();
+            soundBtn.innerHTML = '<span class="sound-icon">OFF</span> SOM';
+            soundBtn.classList.remove('playing');
+            soundBtn.style.borderColor = "#d4a373"; // Volta borda dourada
+        }
+    });
+}
+
+// =========================================================================
+// --- 8. PRELOADER (DESTRAVAR A TELA) ---
+// =========================================================================
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        window.scrollTo(0, 0);
+        
+        gsap.to(preloader, {
+            opacity: 0,
+            duration: 1,
+            onComplete: () => {
+                preloader.style.visibility = 'hidden';
+                ScrollTrigger.refresh();
+            }
+        });
+    }
+});
+
+// Fallback de Segurança (Se o site não abrir em 3s, abre na marra)
+setTimeout(() => {
+    const preloader = document.getElementById('preloader');
+    if (preloader && preloader.style.visibility !== 'hidden') {
+        preloader.style.opacity = '0';
+        preloader.style.visibility = 'hidden';
+    }
+}, 3000);
