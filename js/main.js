@@ -602,59 +602,66 @@ if (feedbackForm) {
 
 
 // ==========================================
-// --- CONTROLE DE ÁUDIO (SUPER SIMPLES) ---
+// --- 1. CONTROLE DE ÁUDIO (COM TRAVA) ---
 // ==========================================
 const bgAudio = document.getElementById('bg-audio');
 const soundBtn = document.getElementById('sound-toggle');
 
 if (bgAudio && soundBtn) {
     bgAudio.volume = 0.5;
+    let isBusy = false; // A Trava de segurança
 
     soundBtn.addEventListener('click', () => {
+        if (isBusy) return; // Se estiver ocupado, não faz nada
+
         if (bgAudio.paused) {
-            // TENTAR TOCAR
+            isBusy = true; // Trava
             bgAudio.play().then(() => {
-                // Se der certo:
                 soundBtn.innerHTML = '<span class="sound-icon">ON</span> SOM';
                 soundBtn.classList.add('playing');
-                soundBtn.style.borderColor = "#4d9e5f"; // Força borda verde
+                soundBtn.style.borderColor = "#4d9e5f";
+                isBusy = false; // Destrava
             }).catch((err) => {
                 console.error("Erro no áudio:", err);
+                isBusy = false; // Destrava mesmo com erro
             });
         } else {
-            // PAUSAR
             bgAudio.pause();
             soundBtn.innerHTML = '<span class="sound-icon">OFF</span> SOM';
             soundBtn.classList.remove('playing');
-            soundBtn.style.borderColor = "#d4a373"; // Volta borda dourada
+            soundBtn.style.borderColor = "#d4a373";
+            isBusy = false;
         }
     });
 }
 
-// =========================================================================
-// --- 8. PRELOADER (DESTRAVAR A TELA) ---
-// =========================================================================
-window.addEventListener('load', () => {
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        window.scrollTo(0, 0);
-        
-        gsap.to(preloader, {
-            opacity: 0,
-            duration: 1,
-            onComplete: () => {
-                preloader.style.visibility = 'hidden';
-                ScrollTrigger.refresh();
-            }
-        });
-    }
-});
+// ==========================================
+// --- 2. PRELOADER (CÓDIGO QUE DESTRAVA A TELA) ---
+// ==========================================
+// Esse código é obrigatório para o loading sumir
 
-// Fallback de Segurança (Se o site não abrir em 3s, abre na marra)
-setTimeout(() => {
+function hideLoader() {
     const preloader = document.getElementById('preloader');
-    if (preloader && preloader.style.visibility !== 'hidden') {
-        preloader.style.opacity = '0';
-        preloader.style.visibility = 'hidden';
+    if (preloader && preloader.style.display !== 'none') {
+        // Usa GSAP se estiver disponível, senão vai no CSS puro
+        if (typeof gsap !== 'undefined') {
+            gsap.to(preloader, {
+                opacity: 0,
+                duration: 1,
+                onComplete: () => {
+                    preloader.style.visibility = 'hidden';
+                    preloader.style.display = 'none';
+                    if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+                }
+            });
+        } else {
+            preloader.style.display = 'none'; // Fallback simples
+        }
     }
-}, 3000);
+}
+
+// Tenta esconder quando tudo carregar
+window.addEventListener('load', hideLoader);
+
+// SEGURANÇA MÁXIMA: Se o site não abrir em 4 segundos, abre na marra
+setTimeout(hideLoader, 4000);
