@@ -602,35 +602,62 @@ if (feedbackForm) {
 
 
 // ==========================================
-// --- 1. CONTROLE DE ÁUDIO (COM TRAVA) ---
+// --- 1. CONTROLE DE ÁUDIO (AUTOPLAY) ---
 // ==========================================
 const bgAudio = document.getElementById('bg-audio');
 const soundBtn = document.getElementById('sound-toggle');
 
 if (bgAudio && soundBtn) {
-    bgAudio.volume = 0.5;
-    let isBusy = false; // A Trava de segurança
+    bgAudio.volume = 0.5; // Volume inicial em 50%
+    let isPlaying = false;
 
-    soundBtn.addEventListener('click', () => {
-        if (isBusy) return; // Se estiver ocupado, não faz nada
+    // Atualiza o visual do botão
+    function updateBtnState(playing) {
+        if(playing) {
+            soundBtn.classList.add('playing');
+            soundBtn.innerHTML = '<span class="sound-icon">ON</span> SOM';
+            soundBtn.style.borderColor = "#4d9e5f";
+        } else {
+            soundBtn.classList.remove('playing');
+            soundBtn.innerHTML = '<span class="sound-icon">OFF</span> SOM';
+            soundBtn.style.borderColor = "#d4a373";
+        }
+    }
 
+    // Tenta tocar sozinho assim que o código carrega
+    const playPromise = bgAudio.play();
+
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            // Sucesso: O navegador deixou tocar
+            console.log("Áudio iniciado automaticamente.");
+            isPlaying = true;
+            updateBtnState(true);
+        }).catch(error => {
+            // Bloqueado: Navegador exige interação.
+            console.log("Autoplay bloqueado. Aguardando primeiro clique.");
+            // Adiciona um "ouvinte" para tocar no primeiro clique em QUALQUER lugar da tela
+            document.addEventListener('click', () => {
+                if(!isPlaying) {
+                    bgAudio.play();
+                    isPlaying = true;
+                    updateBtnState(true);
+                }
+            }, { once: true }); // { once: true } garante que esse comando só rode uma vez
+        });
+    }
+
+    // Controle manual pelo botão (caso o usuário queira pausar depois)
+    soundBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Impede conflitos
         if (bgAudio.paused) {
-            isBusy = true; // Trava
-            bgAudio.play().then(() => {
-                soundBtn.innerHTML = '<span class="sound-icon">ON</span> SOM';
-                soundBtn.classList.add('playing');
-                soundBtn.style.borderColor = "#4d9e5f";
-                isBusy = false; // Destrava
-            }).catch((err) => {
-                console.error("Erro no áudio:", err);
-                isBusy = false; // Destrava mesmo com erro
-            });
+            bgAudio.play();
+            updateBtnState(true);
+            isPlaying = true;
         } else {
             bgAudio.pause();
-            soundBtn.innerHTML = '<span class="sound-icon">OFF</span> SOM';
-            soundBtn.classList.remove('playing');
-            soundBtn.style.borderColor = "#d4a373";
-            isBusy = false;
+            updateBtnState(false);
+            isPlaying = false;
         }
     });
 }
@@ -665,3 +692,65 @@ window.addEventListener('load', hideLoader);
 
 // SEGURANÇA MÁXIMA: Se o site não abrir em 4 segundos, abre na marra
 setTimeout(hideLoader, 4000);
+
+// ==========================================
+// --- 2. INTRODUÇÃO: A LANÇA (SPEAR) ---
+// ==========================================
+
+function startCinematicIntro() {
+    const introEl = document.getElementById('cinematic-intro');
+    if (!introEl) return;
+
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0,0);
+
+    const tl = gsap.timeline();
+
+    // 1. Frases Iniciais
+    const phrases = document.querySelectorAll('.phrase');
+    phrases.forEach(phrase => {
+        tl.to(phrase, { opacity: 1, filter: "blur(0px)", duration: 1.5, ease: "power2.out" })
+          .to(phrase, { opacity: 0, filter: "blur(10px)", duration: 1, ease: "power2.in" }, "+=0.5");
+    });
+
+    // 2. Aparece o Título (Sem a lança ainda)
+    tl.set('.intro-main-title', { opacity: 1 });
+    tl.fromTo('.mega-title .block-text:first-child', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 });
+    
+    // 3. "ANCESTRAIS" aparece
+    tl.fromTo('.mega-title .accent', 
+        { scale: 1.2, opacity: 0, filter: "blur(20px)" }, 
+        { scale: 1, opacity: 1, filter: "blur(0px)", duration: 1.5 }
+    );
+
+    // 4. A LANÇA CRAVA (Impacto!)
+    tl.to('.spear-wrapper', {
+        opacity: 1,
+        left: "-20%", // Posição final (cravada na letra A ou N)
+        duration: 0.4, // Velocidade do arremesso (rápido!)
+        ease: "power4.out"
+    }, "-=0.5"); // Acontece logo antes do texto terminar de aparecer
+
+    // 5. Tremor de Impacto (Shake effect no texto)
+    tl.to('.mega-title .accent', {
+        x: 5, duration: 0.05, repeat: 5, yoyo: true, ease: "sine.inOut"
+    });
+
+    // 6. Linha e Subtítulo
+    tl.to('.intro-line', { width: "60%", duration: 1 });
+    tl.fromTo('.intro-sub', { opacity: 0 }, { opacity: 1, duration: 1 }, "-=0.5");
+
+    // 7. Saída Suave
+    tl.to({}, { duration: 2 }) // Espera 2s para admirar
+      .to('#cinematic-intro', {
+          opacity: 0, duration: 2, ease: "power2.inOut",
+          onComplete: () => {
+              introEl.remove();
+              document.body.style.overflow = '';
+              ScrollTrigger.refresh();
+          }
+      });
+}
+
+// Inicia
+window.addEventListener('load', () => setTimeout(startCinematicIntro, 100));
