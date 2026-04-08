@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/feedback")
-@CrossOrigin(origins = "*") // Libera o acesso para o seu site
+@CrossOrigin(origins = "*") 
 public class FeedbackController {
 
     @Autowired
