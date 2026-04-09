@@ -665,7 +665,6 @@ if (bgAudio && soundBtn) {
 // ==========================================
 // --- 2. PRELOADER (CÓDIGO QUE DESTRAVA A TELA) ---
 // ==========================================
-// Esse código é obrigatório para o loading sumir
 
 function hideLoader() {
     const preloader = document.getElementById('preloader');
